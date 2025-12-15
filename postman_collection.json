@@ -1,0 +1,1598 @@
+{
+    "info": {
+        "_postman_id": "banking-system-collection",
+        "name": "Banking System API",
+        "description": "Complete API collection for Banking System with Keycloak authentication",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "_exporter_id": "banking-system"
+    },
+    "item": [
+        {
+            "name": "Auth",
+            "item": [
+                {
+                    "name": "Register",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.accessToken) {",
+                                    "        pm.collectionVariables.set(\"access_token\", response.accessToken);",
+                                    "        pm.collectionVariables.set(\"refresh_token\", response.refreshToken);",
+                                    "        pm.collectionVariables.set(\"test_username\", pm.collectionVariables.get(\"register_username\"));",
+                                    "        console.log(\"User registered and logged in - tokens saved\");",
+                                    "    } else {",
+                                    "        pm.collectionVariables.set(\"test_username\", pm.collectionVariables.get(\"register_username\"));",
+                                    "        console.log(\"User registered successfully - please login\");",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"{{register_username}}\",\n    \"email\": \"{{register_email}}\",\n    \"password\": \"{{register_password}}\",\n    \"firstName\": \"{{register_firstName}}\",\n    \"lastName\": \"{{register_lastName}}\",\n    \"role\": \"{{register_role}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/register",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "description": "Register a new user in Keycloak and save to local database.\n\n**Workflow:**\n1. Validate input data\n2. Check if username/email already exists (Keycloak + Local DB)\n3. Create user in Keycloak via Admin REST API\n   - Ensure realm exists\n   - Create user with credentials\n   - Ensure role exists (create if not)\n   - Assign role to user\n4. Save user data in local database\n   - Link with Keycloak ID\n   - Set local role\n5. Record registration in LoginHistory\n   - Save IP address, User Agent, timestamp\n6. Get access token from Keycloak\n7. Return token + user info (user can use token immediately)\n\n**Variables:**\n- register_username: Username for the new user\n- register_email: Email address\n- register_password: Password (min 6 characters)\n- register_firstName: First name\n- register_lastName: Last name\n- register_role: Role name (default: USER)\n\n**Response:**\n- accessToken: JWT token (can be used immediately)\n- refreshToken: Token to refresh access token\n- expiresIn: Token expiration time in seconds\n- userInfo: User details from local database\n\n**Note:** Role will be created automatically if it doesn't exist. User can use the returned token immediately without separate login."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Login",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const response = pm.response.json();",
+                                    "    pm.collectionVariables.set(\"access_token\", response.accessToken);",
+                                    "    pm.collectionVariables.set(\"refresh_token\", response.refreshToken);",
+                                    "    console.log(\"Login successful - tokens saved\");",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"{{test_username}}\",\n    \"password\": \"{{test_password}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "description": "Login and get access token from Keycloak.\n\n**Workflow:**\n1. Get token from Keycloak\n2. Validate token\n3. Update lastLoginAt for user\n4. Record login in LoginHistory\n5. Return token + basic user info\n\n**Variables:**\n- test_username: Username\n- test_password: Password\n\n**Response:**\n- accessToken: JWT token for authentication\n- refreshToken: Token to refresh access token\n- expiresIn: Token expiration time in seconds\n- userInfo: Basic user information"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Refresh Token",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const response = pm.response.json();",
+                                    "    pm.collectionVariables.set(\"access_token\", response.accessToken);",
+                                    "    pm.collectionVariables.set(\"refresh_token\", response.refreshToken);",
+                                    "    console.log(\"Token refreshed successfully\");",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"refresh_token\": \"{{refresh_token}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/refresh",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "refresh"
+                            ]
+                        },
+                        "description": "Refresh access token using refresh token"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Validate Token",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/validate",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "validate"
+                            ]
+                        },
+                        "description": "Validate access token and get user information.\n\n**Workflow:**\n1. Validate token with Keycloak\n2. Return user data if token is valid\n\n**Authorization:**\n- Header: Authorization: Bearer {access_token}\n\n**Response:**\n- valid: true/false\n- user: User information from local database\n\n**Note:** This endpoint is public and doesn't require authentication (token is in header)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Logout",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"refresh_token\": \"{{refresh_token}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/logout",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "logout"
+                            ]
+                        },
+                        "description": "Logout and invalidate tokens.\n\n**Workflow:**\n1. Logout from Keycloak\n2. Record logout time in LoginHistory\n\n**Authorization:**\n- Header: Authorization: Bearer {access_token}\n\n**Body:**\n- refresh_token: The refresh token to invalidate\n\n**Note:** Requires authentication. Both access token and refresh token should be provided."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Access Token (Keycloak Direct)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const response = pm.response.json();",
+                                    "    pm.collectionVariables.set(\"access_token\", response.access_token);",
+                                    "    pm.collectionVariables.set(\"refresh_token\", response.refresh_token);",
+                                    "    console.log(\"Access token saved successfully\");",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/x-www-form-urlencoded"
+                            }
+                        ],
+                        "body": {
+                            "mode": "urlencoded",
+                            "urlencoded": [
+                                {
+                                    "key": "grant_type",
+                                    "value": "password",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "client_id",
+                                    "value": "{{client_id}}",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "client_secret",
+                                    "value": "{{client_secret}}",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "username",
+                                    "value": "{{test_username}}",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "password",
+                                    "value": "{{test_password}}",
+                                    "type": "text"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{keycloak_url}}/realms/{{realm}}/protocol/openid-connect/token",
+                            "host": [
+                                "{{keycloak_url}}"
+                            ],
+                            "path": [
+                                "realms",
+                                "{{realm}}",
+                                "protocol",
+                                "openid-connect",
+                                "token"
+                            ]
+                        },
+                        "description": "Get access token from Keycloak using username and password"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Refresh Token",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/x-www-form-urlencoded"
+                            }
+                        ],
+                        "body": {
+                            "mode": "urlencoded",
+                            "urlencoded": [
+                                {
+                                    "key": "grant_type",
+                                    "value": "refresh_token",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "client_id",
+                                    "value": "{{client_id}}",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "client_secret",
+                                    "value": "{{client_secret}}",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "refresh_token",
+                                    "value": "{{refresh_token}}",
+                                    "type": "text"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{keycloak_url}}/realms/{{realm}}/protocol/openid-connect/token",
+                            "host": [
+                                "{{keycloak_url}}"
+                            ],
+                            "path": [
+                                "realms",
+                                "{{realm}}",
+                                "protocol",
+                                "openid-connect",
+                                "token"
+                            ]
+                        },
+                        "description": "Refresh access token using refresh token"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Authentication endpoints - Register, Login, Refresh Token, User Info"
+        },
+        {
+            "name": "Auth - User Info",
+            "item": [
+                {
+                    "name": "Get User Info",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/user-info",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "user-info"
+                            ]
+                        },
+                        "description": "Get information about the authenticated user. Requires: Any authenticated user"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Current User (Me)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/me",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "me"
+                            ]
+                        },
+                        "description": "Get current user details. Requires: CUSTOMER, TELLER, MANAGER, or ADMIN role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Test Authentication",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/test",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "test"
+                            ]
+                        },
+                        "description": "Test endpoint to verify authentication"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Authentication endpoints - Register, Login, Refresh Token, User Info"
+        },
+        {
+            "name": "Accounts",
+            "item": [
+                {
+                    "name": "Get All Accounts",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/accounts",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "accounts"
+                            ]
+                        },
+                        "description": "Get all accounts"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Customer",
+            "item": [
+                {
+                    "name": "Get Customer Accounts",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/customer/accounts",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "customer",
+                                "accounts"
+                            ]
+                        },
+                        "description": "Get customer accounts. Requires: CUSTOMER, TELLER, MANAGER, or ADMIN role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Customer Transactions",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/customer/transactions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "customer",
+                                "transactions"
+                            ]
+                        },
+                        "description": "Get customer transactions. Requires: CUSTOMER, TELLER, MANAGER, or ADMIN role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Customer Profile",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/customer/profile",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "customer",
+                                "profile"
+                            ]
+                        },
+                        "description": "Get customer profile. Requires: CUSTOMER, TELLER, MANAGER, or ADMIN role"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Customer-related endpoints"
+        },
+        {
+            "name": "Teller",
+            "item": [
+                {
+                    "name": "Get Teller Transactions",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/teller/transactions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "teller",
+                                "transactions"
+                            ]
+                        },
+                        "description": "Get teller transactions. Requires: TELLER, MANAGER, or ADMIN role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Process Transaction",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount\": 1000,\n    \"accountNumber\": \"ACC-001\",\n    \"transactionType\": \"DEPOSIT\",\n    \"description\": \"Test transaction\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/teller/process-transaction",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "teller",
+                                "process-transaction"
+                            ]
+                        },
+                        "description": "Process a transaction. Requires: TELLER, MANAGER, or ADMIN role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Teller Dashboard",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/teller/dashboard",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "teller",
+                                "dashboard"
+                            ]
+                        },
+                        "description": "Get teller dashboard. Requires: TELLER, MANAGER, or ADMIN role"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Teller-related endpoints"
+        },
+        {
+            "name": "Manager",
+            "item": [
+                {
+                    "name": "Get Reports",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/manager/reports",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "manager",
+                                "reports"
+                            ]
+                        },
+                        "description": "Get manager reports. Requires: MANAGER or ADMIN role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Analytics",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/manager/analytics",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "manager",
+                                "analytics"
+                            ]
+                        },
+                        "description": "Get analytics dashboard. Requires: MANAGER or ADMIN role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Users",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/manager/users",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "manager",
+                                "users"
+                            ]
+                        },
+                        "description": "Get users (manager level). Requires: MANAGER or ADMIN role"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Manager-related endpoints"
+        },
+        {
+            "name": "Admin",
+            "item": [
+                {
+                    "name": "Get Admin Dashboard",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/dashboard",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "dashboard"
+                            ]
+                        },
+                        "description": "Get admin dashboard. Requires: ADMIN role only"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get All Users",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/users",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "users"
+                            ]
+                        },
+                        "description": "Get all users. Requires: ADMIN role only"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get System Info",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/system",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "system"
+                            ]
+                        },
+                        "description": "Get system information. Requires: ADMIN role only"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get System Config",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/config",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "config"
+                            ]
+                        },
+                        "description": "Get system configuration. Requires: ADMIN role only"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Admin-only endpoints"
+        },
+        {
+            "name": "Account Types",
+            "item": [
+                {
+                    "name": "Get All Account Types",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/account-types",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "account-types"
+                            ]
+                        },
+                        "description": "Get all scheduled transactions"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Customers",
+            "item": [
+                {
+                    "name": "Get All Customers",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/transactions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "customers"
+                            ]
+                        },
+                        "description": "Get all customers"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Transactions",
+            "item": [
+                {
+                    "name": "Get All Transactions",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/transactions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "customers"
+                            ]
+                        },
+                        "description": "Get all scheduled transactions"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Users",
+            "item": [
+                {
+                    "name": "Get All Users",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/users",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "users"
+                            ]
+                        },
+                        "description": "Get all users"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Roles",
+            "item": [
+                {
+                    "name": "Get All Roles",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/roles",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "roles"
+                            ]
+                        },
+                        "description": "Get all roles from Keycloak. Requires: ADMIN role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Role",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"ROLE_NAME\",\n    \"description\": \"Role description\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/roles",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "roles"
+                            ]
+                        },
+                        "description": "Create a new role in Keycloak. Requires: ADMIN role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Assign Role to User",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"{{test_username}}\",\n    \"roleName\": \"CUSTOMER\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/roles/assign",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "roles",
+                                "assign"
+                            ]
+                        },
+                        "description": "Assign a role to a user. Requires: ADMIN role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Remove Role from User",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"{{test_username}}\",\n    \"roleName\": \"CUSTOMER\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/roles/remove",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "roles",
+                                "remove"
+                            ]
+                        },
+                        "description": "Remove a role from a user. Requires: ADMIN role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get User Roles",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/roles/user/{{test_username}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "roles",
+                                "user",
+                                "{{test_username}}"
+                            ]
+                        },
+                        "description": "Get all roles assigned to a user. Requires: ADMIN role or the user themselves"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Ensure Default Roles",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/roles/ensure-defaults",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "roles",
+                                "ensure-defaults"
+                            ]
+                        },
+                        "description": "Ensure default roles (USER, ADMIN, CUSTOMER, TELLER, MANAGER) exist in Keycloak. Requires: ADMIN role"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Permissions",
+            "item": [
+                {
+                    "name": "Get All Permissions",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/permissions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "permissions"
+                            ]
+                        },
+                        "description": "Get all permissions"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Notifications",
+            "item": [
+                {
+                    "name": "Get All Notifications",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/notifications",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "notifications"
+                            ]
+                        },
+                        "description": "Get all scheduled transactions"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Support Tickets",
+            "item": [
+                {
+                    "name": "Get All Support Tickets",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/support-tickets",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "support-tickets"
+                            ]
+                        },
+                        "description": "Get all support tickets"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Reports",
+            "item": [
+                {
+                    "name": "Get All Reports",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/reports",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "reports"
+                            ]
+                        },
+                        "description": "Get all scheduled transactions"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Audit Logs",
+            "item": [
+                {
+                    "name": "Get All Audit Logs",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/audit-logs",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "audit-logs"
+                            ]
+                        },
+                        "description": "Get all audit logs"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Scheduled Transactions",
+            "item": [
+                {
+                    "name": "Get All Scheduled Transactions",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/scheduled-transactions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "scheduled-transactions"
+                            ]
+                        },
+                        "description": "Get all scheduled transactions"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Role Permissions",
+            "item": [
+                {
+                    "name": "Get All Role Permissions",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/role-permissions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "role-permissions"
+                            ]
+                        },
+                        "description": "Get all role permissions"
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    ""
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    ""
+                ]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8080",
+            "type": "string"
+        },
+        {
+            "key": "keycloak_url",
+            "value": "http://localhost:8180",
+            "type": "string"
+        },
+        {
+            "key": "realm",
+            "value": "banking-system",
+            "type": "string"
+        },
+        {
+            "key": "client_id",
+            "value": "banking-system-client",
+            "type": "string"
+        },
+        {
+            "key": "client_secret",
+            "value": "your-client-secret-here",
+            "type": "string"
+        },
+        {
+            "key": "test_username",
+            "value": "testuser",
+            "type": "string"
+        },
+        {
+            "key": "test_password",
+            "value": "test123",
+            "type": "string"
+        },
+        {
+            "key": "access_token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "refresh_token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "register_username",
+            "value": "newuser",
+            "type": "string"
+        },
+        {
+            "key": "register_email",
+            "value": "newuser@banking.com",
+            "type": "string"
+        },
+        {
+            "key": "register_password",
+            "value": "password123",
+            "type": "string"
+        },
+        {
+            "key": "register_firstName",
+            "value": "New",
+            "type": "string"
+        },
+        {
+            "key": "register_lastName",
+            "value": "User",
+            "type": "string"
+        },
+        {
+            "key": "register_role",
+            "value": "CUSTOMER",
+            "type": "string"
+        }
+    ]
+}

@@ -1,0 +1,63 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: banking-postgres
+    environment:
+      POSTGRES_DB: banking_system
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - banking-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Banking System Application (اختياري - لتشغيل التطبيق داخل Docker)
+  # banking-app:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: banking-app
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #     SPRING_PROFILES_ACTIVE: docker
+  #   networks:
+  #     - banking-network
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   restart: unless-stopped
+
+  # Keycloak Service (اختياري - إذا كنت تريد تشغيل Keycloak عبر Docker أيضاً)
+  # keycloak:
+  #   image: quay.io/keycloak/keycloak:latest
+  #   container_name: banking-keycloak
+  #   environment:
+  #     KEYCLOAK_ADMIN: admin
+  #     KEYCLOAK_ADMIN_PASSWORD: admin
+  #   ports:
+  #     - "8180:8080"
+  #   command: start-dev
+  #   networks:
+  #     - banking-network
+  #   depends_on:
+  #     - postgres
+  #   restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  banking-network:
+    driver: bridge
+

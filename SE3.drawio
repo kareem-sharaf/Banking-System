@@ -1,0 +1,266 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36" version="29.2.3">
+  <diagram name="Banking System" id="banking-system-diagram">
+    <mxGraphModel dx="3330" dy="1554" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="account-type" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=23;fillColor=#eeeeee;strokeColor=#888888;shadow=1;" value="AccountType" vertex="1">
+          <mxGeometry height="180" width="220" x="520" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="account-type-attrs" parent="account-type" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" value="+ id: Long&#xa;+ name: String&#xa;+ code: String&#xa;&#xa;Types:&#xa;• SAVINGS&#xa;• CHECKING&#xa;• LOAN&#xa;• INVESTMENT" vertex="1">
+          <mxGeometry height="157" width="220" y="23" as="geometry" />
+        </mxCell>
+        <mxCell id="account" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=23;fillColor=#d9e8ff;strokeColor=#5b8ac4;shadow=1;" value="Account" vertex="1">
+          <mxGeometry height="300" width="280" x="520" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="account-attrs" parent="account" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" value="+ id: Long&#xa;+ accountNumber: String&#xa;+ accountType: AccountType&#xa;+ parentAccountId: Long (nullable)&#xa;+ state: AccountState&#xa;+ balance: BigDecimal&#xa;+ currency: String&#xa;+ openedDate: LocalDateTime&#xa;+ closedDate: LocalDateTime (nullable)&#xa;+ customerId: Long&#xa;+ groupId: Long (nullable)&#xa;&#xa;+ createAccount()&#xa;+ modifyAccount()&#xa;+ closeAccount()&#xa;+ freezeAccount()&#xa;+ suspendAccount()&#xa;+ activateAccount()" vertex="1">
+          <mxGeometry height="277" width="280" y="23" as="geometry" />
+        </mxCell>
+        <mxCell id="account-state" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=23;fillColor=#eeeeee;strokeColor=#888888;shadow=1;" value="AccountState (Enum)" vertex="1">
+          <mxGeometry height="140" width="200" x="540" y="1000" as="geometry" />
+        </mxCell>
+        <mxCell id="account-state-attrs" parent="account-state" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" value="ACTIVE&#xa;FROZEN&#xa;SUSPENDED&#xa;CLOSED" vertex="1">
+          <mxGeometry height="117" width="200" y="23" as="geometry" />
+        </mxCell>
+        <mxCell id="transaction" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=23;fillColor=#d9e8ff;strokeColor=#5b8ac4;shadow=1;" value="Transaction" vertex="1">
+          <mxGeometry height="320" width="300" x="900" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="transaction-attrs" parent="transaction" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" value="+ id: Long&#xa;+ transactionNumber: String&#xa;+ fromAccountId: Long&#xa;+ toAccountId: Long (nullable)&#xa;+ transactionType: TransactionType&#xa;+ amount: BigDecimal&#xa;+ currency: String&#xa;+ transactionDate: LocalDateTime&#xa;+ status: TransactionStatus&#xa;+ description: String&#xa;+ authorizationCode: String (nullable)&#xa;+ validatedBy: Long (nullable)&#xa;&#xa;+ processDeposit()&#xa;+ processWithdrawal()&#xa;+ processTransfer()&#xa;+ validate()&#xa;+ authorize()" vertex="1">
+          <mxGeometry height="297" width="300" y="23" as="geometry" />
+        </mxCell>
+        <mxCell id="transaction-type" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=23;fillColor=#eeeeee;strokeColor=#888888;shadow=1;" value="TransactionType (Enum)" vertex="1">
+          <mxGeometry height="140" width="200" x="900" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="transaction-type-attrs" parent="transaction-type" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" value="DEPOSIT&#xa;WITHDRAWAL&#xa;TRANSFER&#xa;PAYMENT&#xa;FEE" vertex="1">
+          <mxGeometry height="117" width="200" y="23" as="geometry" />
+        </mxCell>
+        <mxCell id="transaction-status" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=23;fillColor=#eeeeee;strokeColor=#888888;shadow=1;" value="TransactionStatus (Enum)" vertex="1">
+          <mxGeometry height="140" width="200" x="900" y="780" as="geometry" />
+        </mxCell>
+        <mxCell id="transaction-status-attrs" parent="transaction-status" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" value="PENDING&#xa;COMPLETED&#xa;FAILED&#xa;CANCELLED&#xa;REJECTED" vertex="1">
+          <mxGeometry height="117" width="200" y="23" as="geometry" />
+        </mxCell>
+        <mxCell id="scheduled-transaction" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=23;fillColor=#d7f5d7;strokeColor=#6fbf73;shadow=1;" value="ScheduledTransaction" vertex="1">
+          <mxGeometry height="240" width="280" x="1260" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="scheduled-transaction-attrs" parent="scheduled-transaction" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" value="+ id: Long&#xa;+ transactionTemplateId: Long&#xa;+ scheduleType: ScheduleType&#xa;+ nextExecutionDate: LocalDateTime&#xa;+ endDate: LocalDateTime (nullable)&#xa;+ isActive: Boolean&#xa;+ lastExecutedDate: LocalDateTime (nullable)&#xa;+ executionCount: Integer&#xa;&#xa;+ execute()&#xa;+ scheduleNextExecution()&#xa;+ cancelSchedule()" vertex="1">
+          <mxGeometry height="217" width="280" y="23" as="geometry" />
+        </mxCell>
+        <mxCell id="schedule-type" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=23;fillColor=#eeeeee;strokeColor=#888888;shadow=1;" value="ScheduleType (Enum)" vertex="1">
+          <mxGeometry height="120" width="180" x="1260" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="schedule-type-attrs" parent="schedule-type" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" value="DAILY&#xa;WEEKLY&#xa;MONTHLY&#xa;YEARLY" vertex="1">
+          <mxGeometry height="97" width="180" y="23" as="geometry" />
+        </mxCell>
+        <mxCell id="audit-log" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=23;fillColor=#d7f5d7;strokeColor=#6fbf73;shadow=1;" value="AuditLog" vertex="1">
+          <mxGeometry height="260" width="280" x="1260" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="audit-log-attrs" parent="audit-log" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" value="+ id: Long&#xa;+ transactionId: Long (nullable)&#xa;+ accountId: Long&#xa;+ userId: Long&#xa;+ action: String&#xa;+ actionType: ActionType&#xa;+ timestamp: LocalDateTime&#xa;+ details: String&#xa;+ ipAddress: String&#xa;+ status: String&#xa;&#xa;+ logTransaction()&#xa;+ logAccountChange()&#xa;+ logUserAction()" vertex="1">
+          <mxGeometry height="237" width="280" y="23" as="geometry" />
+        </mxCell>
+        <mxCell id="notification" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=23;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;" value="Notification" vertex="1">
+          <mxGeometry height="260" width="280" x="920" y="1290" as="geometry" />
+        </mxCell>
+        <mxCell id="notification-attrs" parent="notification" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" value="+ id: Long&#xa;+ userId: Long&#xa;+ accountId: Long (nullable)&#xa;+ notificationType: NotificationType&#xa;+ title: String&#xa;+ message: String&#xa;+ createdDate: LocalDateTime&#xa;+ readDate: LocalDateTime (nullable)&#xa;+ isRead: Boolean&#xa;+ priority: NotificationPriority&#xa;&#xa;+ send()&#xa;+ markAsRead()&#xa;+ sendBalanceAlert()&#xa;+ sendLargeTransactionAlert()" vertex="1">
+          <mxGeometry height="237" width="280" y="23" as="geometry" />
+        </mxCell>
+        <mxCell id="notification-type" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=23;fillColor=#eeeeee;strokeColor=#888888;shadow=1;" value="NotificationType (Enum)" vertex="1">
+          <mxGeometry height="140" width="200" x="520" y="1280" as="geometry" />
+        </mxCell>
+        <mxCell id="notification-type-attrs" parent="notification-type" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" value="BALANCE_CHANGE&#xa;LARGE_TRANSACTION&#xa;ACCOUNT_ALERT&#xa;PAYMENT_DUE&#xa;SYSTEM_NOTIFICATION" vertex="1">
+          <mxGeometry height="117" width="200" y="23" as="geometry" />
+        </mxCell>
+        <mxCell id="support-ticket" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=23;fillColor=#d7f5d7;strokeColor=#6fbf73;shadow=1;" value="SupportTicket" vertex="1">
+          <mxGeometry height="280" width="300" x="60" y="760" as="geometry" />
+        </mxCell>
+        <mxCell id="support-ticket-attrs" parent="support-ticket" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" value="+ id: Long&#xa;+ ticketNumber: String&#xa;+ customerId: Long&#xa;+ assignedToId: Long (nullable)&#xa;+ subject: String&#xa;+ description: String&#xa;+ status: TicketStatus&#xa;+ priority: TicketPriority&#xa;+ category: TicketCategory&#xa;+ createdDate: LocalDateTime&#xa;+ resolvedDate: LocalDateTime (nullable)&#xa;+ resolutionNotes: String (nullable)&#xa;&#xa;+ createTicket()&#xa;+ assignTicket()&#xa;+ updateStatus()&#xa;+ resolveTicket()" vertex="1">
+          <mxGeometry height="257" width="300" y="23" as="geometry" />
+        </mxCell>
+        <mxCell id="ticket-status" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=23;fillColor=#eeeeee;strokeColor=#888888;shadow=1;" value="TicketStatus (Enum)" vertex="1">
+          <mxGeometry height="120" width="180" x="60" y="1120" as="geometry" />
+        </mxCell>
+        <mxCell id="ticket-status-attrs" parent="ticket-status" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" value="OPEN&#xa;IN_PROGRESS&#xa;RESOLVED&#xa;CLOSED" vertex="1">
+          <mxGeometry height="97" width="180" y="23" as="geometry" />
+        </mxCell>
+        <mxCell id="user" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=23;fillColor=#d9e8ff;strokeColor=#5b8ac4;shadow=1;" value="User" vertex="1">
+          <mxGeometry height="280" width="280" x="60" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="user-attrs" parent="user" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" value="+ id: Long&#xa;+ username: String&#xa;+ email: String&#xa;+ passwordHash: String&#xa;+ firstName: String&#xa;+ lastName: String&#xa;+ phoneNumber: String&#xa;+ dateOfBirth: LocalDate&#xa;+ isActive: Boolean&#xa;+ roleId: Long&#xa;+ createdDate: LocalDateTime&#xa;+ lastLoginDate: LocalDateTime (nullable)&#xa;&#xa;+ authenticate()&#xa;+ hasPermission()" vertex="1">
+          <mxGeometry height="257" width="280" y="23" as="geometry" />
+        </mxCell>
+        <mxCell id="role" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=23;fillColor=#d7f5d7;strokeColor=#6fbf73;shadow=1;" value="Role" vertex="1">
+          <mxGeometry height="200" width="240" x="1660" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="role-attrs" parent="role" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" value="+ id: Long&#xa;+ name: String&#xa;+ code: String&#xa;+ description: String&#xa;&#xa;Roles:&#xa;• CUSTOMER&#xa;• TELLER&#xa;• MANAGER&#xa;• ADMIN" vertex="1">
+          <mxGeometry height="177" width="240" y="23" as="geometry" />
+        </mxCell>
+        <mxCell id="permission" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=23;fillColor=#d7f5d7;strokeColor=#6fbf73;shadow=1;" value="Permission" vertex="1">
+          <mxGeometry height="200" width="220" x="1660" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="permission-attrs" parent="permission" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" value="+ id: Long&#xa;+ name: String&#xa;+ resource: String&#xa;+ action: String&#xa;+ description: String&#xa;&#xa;Examples:&#xa;• ACCOUNT_CREATE&#xa;• TRANSACTION_VIEW&#xa;• REPORT_GENERATE" vertex="1">
+          <mxGeometry height="177" width="220" y="23" as="geometry" />
+        </mxCell>
+        <mxCell id="role-permission" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=23;fillColor=#d7f5d7;strokeColor=#6fbf73;shadow=1;" value="RolePermission" vertex="1">
+          <mxGeometry height="150" width="200" x="1660" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="role-permission-attrs" parent="role-permission" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" value="+ id: Long&#xa;+ roleId: Long&#xa;+ permissionId: Long" vertex="1">
+          <mxGeometry height="127" width="200" y="23" as="geometry" />
+        </mxCell>
+        <mxCell id="report" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=23;fillColor=#d7f5d7;strokeColor=#6fbf73;shadow=1;" value="Report" vertex="1">
+          <mxGeometry height="280" width="280" x="1460" y="1040" as="geometry" />
+        </mxCell>
+        <mxCell id="report-attrs" parent="report" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" value="+ id: Long&#xa;+ reportType: ReportType&#xa;+ generatedBy: Long&#xa;+ generatedDate: LocalDateTime&#xa;+ startDate: LocalDateTime&#xa;+ endDate: LocalDateTime&#xa;+ filePath: String&#xa;+ format: ReportFormat&#xa;+ parameters: String (JSON)&#xa;&#xa;+ generateDailyTransactions()&#xa;+ generateAccountSummary()&#xa;+ generateAuditLog()&#xa;+ export()" vertex="1">
+          <mxGeometry height="257" width="280" y="23" as="geometry" />
+        </mxCell>
+        <mxCell id="report-type" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=23;fillColor=#eeeeee;strokeColor=#888888;shadow=1;" value="ReportType (Enum)" vertex="1">
+          <mxGeometry height="140" width="200" x="1460" y="1360" as="geometry" />
+        </mxCell>
+        <mxCell id="report-type-attrs" parent="report-type" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" value="DAILY_TRANSACTIONS&#xa;ACCOUNT_SUMMARY&#xa;AUDIT_LOG&#xa;CUSTOMER_SUMMARY&#xa;FINANCIAL_SUMMARY" vertex="1">
+          <mxGeometry height="117" width="200" y="23" as="geometry" />
+        </mxCell>
+        <mxCell id="customer" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=23;fillColor=#d9e8ff;strokeColor=#5b8ac4;shadow=1;" value="Customer" vertex="1">
+          <mxGeometry height="220" width="260" x="60" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="customer-attrs" parent="customer" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" value="+ id: Long&#xa;+ userId: Long&#xa;+ customerNumber: String&#xa;+ joinDate: LocalDateTime&#xa;+ status: CustomerStatus&#xa;&#xa;+ getAccounts()&#xa;+ getTransactions()" vertex="1">
+          <mxGeometry height="197" width="240" y="23" as="geometry" />
+        </mxCell>
+        <mxCell id="rel1" edge="1" parent="1" source="account-type-attrs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;jumps=1;jumpStyle=arc;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" target="account-attrs">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel1-label" connectable="0" parent="rel1" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel1-label2" connectable="0" parent="rel1" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.1" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel2" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;jumps=1;jumpStyle=arc;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.492;entryY=1.002;entryDx=0;entryDy=0;dashed=1;entryPerimeter=0;" target="account-attrs">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel2-label" connectable="0" parent="rel2" value="parent" vertex="1">
+          <mxGeometry relative="1" x="0.1" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel2-label2" connectable="0" parent="rel2" value="0..1" vertex="1">
+          <mxGeometry relative="1" x="-0.1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel2-label3" connectable="0" parent="rel2" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel3" edge="1" parent="1" source="account-attrs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;jumps=1;jumpStyle=arc;exitX=0.002;exitY=0.743;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;exitPerimeter=0;" target="transaction">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="500" y="674" />
+              <mxPoint x="500" y="100" />
+              <mxPoint x="850" y="100" />
+              <mxPoint x="850" y="200" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel3-label" connectable="0" parent="rel3" value="fromAccount" vertex="1">
+          <mxGeometry relative="1" x="0.1" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel4" edge="1" parent="1" source="account" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;jumps=1;jumpStyle=arc;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="transaction">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel4-label" connectable="0" parent="rel4" value="toAccount" vertex="1">
+          <mxGeometry relative="1" x="0.1" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel6" edge="1" parent="1" source="transaction" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;jumps=1;jumpStyle=arc;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="scheduled-transaction">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel7" edge="1" parent="1" source="account-attrs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;jumps=1;jumpStyle=arc;exitX=0.924;exitY=0.991;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;exitPerimeter=0;" target="notification">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="779" y="1355" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel8" edge="1" parent="1" source="user-attrs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;jumps=1;jumpStyle=arc;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="customer">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel9" edge="1" parent="1" source="customer" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;jumps=1;jumpStyle=arc;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="account">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel10" edge="1" parent="1" source="user" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;jumps=1;jumpStyle=arc;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="role">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="200" y="380" />
+              <mxPoint x="830" y="380" />
+              <mxPoint x="830" y="60" />
+              <mxPoint x="1780" y="60" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel11" edge="1" parent="1" source="role" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;jumps=1;jumpStyle=arc;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1.002;entryY=0.451;entryDx=0;entryDy=0;entryPerimeter=0;" target="role-permission-attrs">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel12" edge="1" parent="1" source="permission-attrs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;jumps=1;jumpStyle=arc;entryX=0;entryY=0.75;entryDx=0;entryDy=0;entryPerimeter=0;" target="role-permission-attrs">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel13" edge="1" parent="1" source="user" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;jumps=1;jumpStyle=arc;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.1;entryDx=0;entryDy=0;" target="notification">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="470" y="220" />
+              <mxPoint x="470" y="1250" />
+              <mxPoint x="890" y="1250" />
+              <mxPoint x="890" y="1316" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel14" edge="1" parent="1" source="customer" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;jumps=1;jumpStyle=arc;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="support-ticket">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="190" y="750" />
+              <mxPoint x="210" y="750" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel16" edge="1" parent="1" source="user" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;jumps=1;jumpStyle=arc;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="report">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="450" y="220" />
+              <mxPoint x="450" y="1180" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel18" edge="1" parent="1" source="account-state" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;jumps=1;jumpStyle=arc;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" target="account">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel19" edge="1" parent="1" source="transaction-type" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;jumps=1;jumpStyle=arc;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" target="transaction">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel20" edge="1" parent="1" source="transaction-status" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;jumps=1;jumpStyle=arc;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;" target="transaction">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="880" y="850" />
+              <mxPoint x="880" y="650" />
+              <mxPoint x="1220" y="650" />
+              <mxPoint x="1220" y="360" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="av0V7naLwEiCZyIiU9tC-2" edge="1" parent="1" source="transaction-attrs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.001;entryY=0.108;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.829;exitY=1.012;exitDx=0;exitDy=0;exitPerimeter=0;" target="audit-log-attrs">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1150" y="444" />
+              <mxPoint x="1150" y="749" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
