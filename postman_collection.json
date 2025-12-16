@@ -481,8 +481,263 @@
                         "description": "Get all accounts"
                     },
                     "response": []
+                },
+                {
+                    "name": "Deposit",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const response = pm.response.json();",
+                                    "    console.log(\"Deposit successful - Observers triggered\");",
+                                    "    console.log(\"Transaction Number: \" + response.transactionNumber);",
+                                    "    console.log(\"New Balance: \" + response.newBalance);",
+                                    "    pm.collectionVariables.set(\"last_transaction_number\", response.transactionNumber);",
+                                    "    pm.collectionVariables.set(\"last_account_balance\", response.newBalance);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount\": 1000.00,\n    \"description\": \"Salary deposit - Testing Observer Pattern\",\n    \"reference\": \"REF-DEP-001\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/accounts/{{account_number}}/deposit",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "accounts",
+                                "{{account_number}}",
+                                "deposit"
+                            ]
+                        },
+                        "description": "Deposit money into an account. This will trigger all observers:\n- **EmailNotifier**: Creates email notification\n- **SMSNotifier**: Only for critical events (SUSPICIOUS_ACTIVITY, LOW_BALANCE)\n- **InAppNotifier**: Creates in-app notification\n- **AuditLogger**: Logs to audit table\n\n**Authorization:**\n- Requires: CUSTOMER, TELLER, MANAGER, or ADMIN role\n\n**Request Body:**\n- amount: Deposit amount (required, must be positive, min 0.01)\n- description: Optional description\n- reference: Optional reference number\n\n**Response:**\n- success: Transaction success status\n- message: Response message\n- newBalance: New account balance after deposit\n- transactionNumber: Unique transaction number\n- accountNumber: Account number\n- timestamp: Transaction timestamp\n- currency: Account currency\n- amount: Deposit amount\n\n**Variables:**\n- account_number: Account number to deposit to (e.g., ACC-001)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Withdraw",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const response = pm.response.json();",
+                                    "    console.log(\"Withdrawal successful - Observers triggered\");",
+                                    "    console.log(\"Transaction Number: \" + response.transactionNumber);",
+                                    "    console.log(\"New Balance: \" + response.newBalance);",
+                                    "    pm.collectionVariables.set(\"last_transaction_number\", response.transactionNumber);",
+                                    "    pm.collectionVariables.set(\"last_account_balance\", response.newBalance);",
+                                    "    if (response.newBalance < 100) {",
+                                    "        console.log(\"⚠️ Low balance alert may be triggered\");",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount\": 500.00,\n    \"description\": \"ATM withdrawal - Testing Observer Pattern\",\n    \"reference\": \"REF-WD-001\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/accounts/{{account_number}}/withdraw",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "accounts",
+                                "{{account_number}}",
+                                "withdraw"
+                            ]
+                        },
+                        "description": "Withdraw money from an account. This will trigger all observers and may trigger LOW_BALANCE event if balance goes below threshold (100).\n\n**Authorization:**\n- Requires: CUSTOMER, TELLER, MANAGER, or ADMIN role\n\n**Request Body:**\n- amount: Withdrawal amount (required, must be positive, min 0.01)\n- description: Optional description\n- reference: Optional reference number\n\n**Response:**\n- success: Transaction success status\n- message: Response message\n- newBalance: New account balance after withdrawal\n- transactionNumber: Unique transaction number\n- accountNumber: Account number\n- timestamp: Transaction timestamp\n- currency: Account currency\n- amount: Withdrawal amount\n\n**Error Responses:**\n- 404: Account not found\n- 400: Insufficient balance or invalid account state\n\n**Variables:**\n- account_number: Account number to withdraw from (e.g., ACC-001)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Transfer",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const response = pm.response.json();",
+                                    "    console.log(\"Transfer successful - Observers triggered for both accounts\");",
+                                    "    console.log(\"Transaction Number: \" + response.transactionNumber);",
+                                    "    console.log(\"New Balance: \" + response.newBalance);",
+                                    "    pm.collectionVariables.set(\"last_transaction_number\", response.transactionNumber);",
+                                    "    pm.collectionVariables.set(\"last_account_balance\", response.newBalance);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"toAccountNumber\": \"{{destination_account_number}}\",\n    \"amount\": 200.00,\n    \"description\": \"Transfer payment - Testing Observer Pattern\",\n    \"reference\": \"REF-TRF-001\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/accounts/{{account_number}}/transfer",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "accounts",
+                                "{{account_number}}",
+                                "transfer"
+                            ]
+                        },
+                        "description": "Transfer money between accounts. This will trigger observers for both source and destination accounts:\n- **Source Account**: TRANSFER_COMPLETED event\n- **Destination Account**: DEPOSIT_COMPLETED event\n\n**Authorization:**\n- Requires: CUSTOMER, TELLER, MANAGER, or ADMIN role\n\n**Request Body:**\n- toAccountNumber: Destination account number (required)\n- amount: Transfer amount (required, must be positive, min 0.01)\n- description: Optional description\n- reference: Optional reference number\n\n**Response:**\n- success: Transaction success status\n- message: Response message\n- newBalance: New balance of source account after transfer\n- transactionNumber: Unique transaction number\n- accountNumber: Source account number\n- timestamp: Transaction timestamp\n- currency: Account currency\n- amount: Transfer amount\n\n**Error Responses:**\n- 404: Account not found (source or destination)\n- 400: Insufficient balance, invalid account state, or same account transfer\n\n**Variables:**\n- account_number: Source account number (e.g., ACC-001)\n- destination_account_number: Destination account number (e.g., ACC-002)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Deposit - Trigger Low Balance Alert",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const response = pm.response.json();",
+                                    "    console.log(\"Deposit completed\");",
+                                    "    if (response.newBalance < 100) {",
+                                    "        console.log(\"✅ Low balance alert should be triggered\");",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount\": 50.00,\n    \"description\": \"Small deposit to test low balance alert\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/accounts/{{account_number}}/deposit",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "accounts",
+                                "{{account_number}}",
+                                "deposit"
+                            ]
+                        },
+                        "description": "Test deposit that may trigger LOW_BALANCE event if balance is below 100 after deposit.\n\n**Note:** This endpoint is useful for testing the low balance alert functionality. If the account balance after this deposit is below 100, a LOW_BALANCE event will be triggered, which will:\n- Send SMS notification (SMSNotifier)\n- Send email notification (EmailNotifier)\n- Create in-app notification (InAppNotifier)\n- Log to audit (AuditLogger)"
+                    },
+                    "response": []
                 }
-            ]
+            ],
+            "description": "Account operations with Observer Pattern integration. All operations trigger notifications via Email, SMS, In-App, and Audit observers."
         },
         {
             "name": "Customer",
@@ -1592,6 +1847,26 @@
         {
             "key": "register_role",
             "value": "CUSTOMER",
+            "type": "string"
+        },
+        {
+            "key": "account_number",
+            "value": "ACC-001",
+            "type": "string"
+        },
+        {
+            "key": "destination_account_number",
+            "value": "ACC-002",
+            "type": "string"
+        },
+        {
+            "key": "last_transaction_number",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "last_account_balance",
+            "value": "",
             "type": "string"
         }
     ]
