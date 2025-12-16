@@ -1719,6 +1719,242 @@
             ]
         },
         {
+            "name": "Interest Calculation",
+            "item": [
+                {
+                    "name": "Calculate Interest Now (All Accounts)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const response = pm.response.json();",
+                                    "    console.log(\"Interest calculation completed\");",
+                                    "    console.log(\"Total Accounts: \" + response.totalAccounts);",
+                                    "    console.log(\"Successful: \" + response.successfulCalculations);",
+                                    "    console.log(\"Failed: \" + response.failedCalculations);",
+                                    "    console.log(\"Total Interest: \" + response.totalInterestCalculated);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/interest/calculate-now",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "interest",
+                                "calculate-now"
+                            ]
+                        },
+                        "description": "Trigger manual interest calculation for all active accounts.\n\n**Authorization:**\n- Requires: ADMIN role\n\n**Response:**\n- success: Calculation success status\n- message: Response message\n- calculationTime: When calculation was performed\n- totalAccounts: Total number of accounts processed\n- successfulCalculations: Number of successful calculations\n- failedCalculations: Number of failed calculations\n- skippedAccounts: Number of skipped accounts\n- totalInterestCalculated: Total interest amount calculated\n- calculationDate: Date of calculation\n\n**Note:** This endpoint triggers the daily interest calculation manually. The system also runs automatically at 2 AM daily."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Calculate Interest for Account",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const response = pm.response.json();",
+                                    "    console.log(\"Interest calculation for account completed\");",
+                                    "    console.log(\"Interest Amount: \" + response.totalInterestCalculated);",
+                                    "    if (response.skippedAccounts > 0) {",
+                                    "        console.log(\"⚠️ Calculation was skipped: \" + response.message);",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/interest/calculate/{{account_number}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "interest",
+                                "calculate",
+                                "{{account_number}}"
+                            ]
+                        },
+                        "description": "Calculate interest for a specific account.\n\n**Authorization:**\n- Requires: ADMIN or MANAGER role\n\n**Path Parameters:**\n- accountNumber: The account number to calculate interest for\n\n**Response:**\n- success: Calculation success status\n- message: Response message\n- calculationTime: When calculation was performed\n- totalAccounts: Always 1 (single account)\n- successfulCalculations: 1 if successful, 0 otherwise\n- failedCalculations: 1 if failed, 0 otherwise\n- skippedAccounts: 1 if skipped, 0 otherwise\n- totalInterestCalculated: Interest amount calculated\n- calculationDate: Date of calculation\n\n**Variables:**\n- account_number: Account number (e.g., ACC-001)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Last Calculation Summary",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const response = pm.response.json();",
+                                    "    console.log(\"Last calculation date: \" + response.calculationDate);",
+                                    "    console.log(\"Total Accounts: \" + response.totalAccounts);",
+                                    "    console.log(\"Successful: \" + response.successfulCalculations);",
+                                    "    console.log(\"Failed: \" + response.failedCalculations);",
+                                    "    console.log(\"Total Interest: \" + response.totalInterestCalculated);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/interest/last-calculation",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "interest",
+                                "last-calculation"
+                            ]
+                        },
+                        "description": "Get summary of the last interest calculation.\n\n**Authorization:**\n- Requires: Any authenticated user\n\n**Response:**\n- calculationDate: Date of the calculation\n- totalAccounts: Total number of accounts processed\n- successfulCalculations: Number of successful calculations\n- failedCalculations: Number of failed calculations\n- skippedAccounts: Number of skipped accounts\n- totalInterestCalculated: Total interest amount calculated\n- accountDetails: Array of detailed information for each account calculation"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Calculation History",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/interest/history?startDate=2024-01-01&endDate=2024-01-31",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "interest",
+                                "history"
+                            ],
+                            "query": [
+                                {
+                                    "key": "startDate",
+                                    "value": "2024-01-01",
+                                    "description": "Start date (YYYY-MM-DD)"
+                                },
+                                {
+                                    "key": "endDate",
+                                    "value": "2024-01-31",
+                                    "description": "End date (YYYY-MM-DD)"
+                                }
+                            ]
+                        },
+                        "description": "Get interest calculation history for a date range.\n\n**Authorization:**\n- Requires: ADMIN or MANAGER role\n\n**Query Parameters:**\n- startDate: Start date (required, format: YYYY-MM-DD)\n- endDate: End date (required, format: YYYY-MM-DD)\n\n**Response:**\n- Array of InterestCalculation objects with details for each calculation"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Account Interest Calculations",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/interest/account/{{account_number}}?startDate=2024-01-01&endDate=2024-01-31",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "interest",
+                                "account",
+                                "{{account_number}}"
+                            ],
+                            "query": [
+                                {
+                                    "key": "startDate",
+                                    "value": "2024-01-01",
+                                    "description": "Start date (optional, defaults to 1 month ago)"
+                                },
+                                {
+                                    "key": "endDate",
+                                    "value": "2024-01-31",
+                                    "description": "End date (optional, defaults to today)"
+                                }
+                            ]
+                        },
+                        "description": "Get interest calculation history for a specific account.\n\n**Authorization:**\n- Requires: Any authenticated user\n\n**Path Parameters:**\n- accountNumber: The account number\n\n**Query Parameters:**\n- startDate: Start date (optional, defaults to 1 month ago)\n- endDate: End date (optional, defaults to today)\n\n**Response:**\n- Array of InterestCalculation objects for the specified account\n\n**Variables:**\n- account_number: Account number (e.g., ACC-001)"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Interest Calculation endpoints - Manual calculation, summaries, and history. Uses Strategy Pattern for different account types."
+        },
+        {
             "name": "Role Permissions",
             "item": [
                 {

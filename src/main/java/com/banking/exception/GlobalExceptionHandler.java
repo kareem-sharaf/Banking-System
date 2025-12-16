@@ -101,6 +101,40 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handle interest calculation exceptions
+     */
+    @ExceptionHandler(com.banking.exception.InterestCalculationException.class)
+    public ResponseEntity<Map<String, Object>> handleInterestCalculationException(
+            com.banking.exception.InterestCalculationException ex) {
+        logger.warn("Interest calculation error: {}", ex.getMessage());
+
+        Map<String, Object> error = new HashMap<>();
+        error.put("timestamp", LocalDateTime.now());
+        error.put("status", HttpStatus.BAD_REQUEST.value());
+        error.put("error", "Interest Calculation Error");
+        error.put("message", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    /**
+     * Handle no suitable strategy exceptions
+     */
+    @ExceptionHandler(com.banking.exception.NoSuitableStrategyException.class)
+    public ResponseEntity<Map<String, Object>> handleNoSuitableStrategyException(
+            com.banking.exception.NoSuitableStrategyException ex) {
+        logger.warn("No suitable strategy: {}", ex.getMessage());
+
+        Map<String, Object> error = new HashMap<>();
+        error.put("timestamp", LocalDateTime.now());
+        error.put("status", HttpStatus.BAD_REQUEST.value());
+        error.put("error", "No Suitable Strategy");
+        error.put("message", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    /**
      * Handle all other exceptions
      */
     @ExceptionHandler(Exception.class)

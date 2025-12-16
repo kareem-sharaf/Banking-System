@@ -17,9 +17,9 @@ import java.util.List;
  */
 @Entity
 @Table(name = "accounts", indexes = {
-    @Index(name = "idx_account_number", columnList = "account_number"),
-    @Index(name = "idx_customer_id", columnList = "customer_id"),
-    @Index(name = "idx_parent_account_id", columnList = "parent_account_id")
+        @Index(name = "idx_account_number", columnList = "account_number"),
+        @Index(name = "idx_customer_id", columnList = "customer_id"),
+        @Index(name = "idx_parent_account_id", columnList = "parent_account_id")
 })
 @Getter
 @Setter
@@ -74,6 +74,12 @@ public class Account {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "interest_rate", precision = 5, scale = 4)
+    private java.math.BigDecimal interestRate;
+
+    @Column(name = "last_interest_calculation")
+    private java.time.LocalDate lastInterestCalculation;
+
     @OneToMany(mappedBy = "fromAccount", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Transaction> fromTransactions = new ArrayList<>();
 
@@ -85,6 +91,9 @@ public class Account {
 
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<AuditLog> auditLogs = new ArrayList<>();
+
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<InterestCalculation> interestCalculations = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
@@ -100,4 +109,3 @@ public class Account {
         updatedAt = LocalDateTime.now();
     }
 }
-
