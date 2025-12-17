@@ -1,6 +1,4 @@
-package com.banking.observer;
-
-import com.banking.observer.event.AccountEvent;
+package com.banking.account.service.notification;
 
 public interface AccountSubject {
 

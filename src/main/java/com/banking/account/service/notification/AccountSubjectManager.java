@@ -1,9 +1,6 @@
-package com.banking.account.service;
+package com.banking.account.service.notification;
 
 import com.banking.account.module.entity.Account;
-import com.banking.observer.AccountObserver;
-import com.banking.observer.AccountSubject;
-import com.banking.observer.event.AccountEvent;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

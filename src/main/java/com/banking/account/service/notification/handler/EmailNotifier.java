@@ -1,4 +1,4 @@
-package com.banking.observer.impl;
+package com.banking.account.service.notification.handler;
 
 import com.banking.account.module.entity.Account;
 import com.banking.core.notification.module.entity.Notification;
@@ -6,8 +6,8 @@ import com.banking.core.auth.module.entity.User;
 import com.banking.core.enums.AccountEventType;
 import com.banking.core.enums.NotificationPriority;
 import com.banking.core.enums.NotificationType;
-import com.banking.observer.AccountObserver;
-import com.banking.observer.event.AccountEvent;
+import com.banking.account.service.notification.AccountObserver;
+import com.banking.account.service.notification.AccountEvent;
 import com.banking.core.notification.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;

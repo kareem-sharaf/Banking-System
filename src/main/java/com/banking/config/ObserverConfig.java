@@ -1,6 +1,6 @@
 package com.banking.config;
 
-import com.banking.observer.AccountObserver;
+import com.banking.account.service.notification.AccountObserver;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

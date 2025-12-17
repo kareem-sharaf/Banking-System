@@ -1,4 +1,4 @@
-package com.banking.observer.event;
+package com.banking.account.service.notification;
 
 import com.banking.account.module.entity.Account;
 import com.banking.transaction.module.entity.Transaction;
