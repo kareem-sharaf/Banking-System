@@ -1,8 +1,7 @@
-package com.banking.strategy.impl;
+package com.banking.account.service.interest.calculator;
 
 import com.banking.account.module.entity.Account;
 import com.banking.account.module.entity.AccountType;
-import com.banking.strategy.InterestCalculationStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +10,7 @@ import java.time.LocalDate;
 
 @Component
 @Slf4j
-public class CheckingInterestStrategy implements InterestCalculationStrategy {
+public class CheckingInterestCalculator implements InterestCalculator {
 
     private static final BigDecimal DEFAULT_INTEREST_RATE = BigDecimal.ZERO; // No interest by default
     private static final BigDecimal MINIMAL_INTEREST_RATE = new BigDecimal("0.001"); // 0.1% annual if enabled
@@ -58,8 +57,8 @@ public class CheckingInterestStrategy implements InterestCalculationStrategy {
     }
 
     @Override
-    public String getStrategyName() {
-        return "CheckingInterestStrategy";
+    public String getCalculatorName() {
+        return "CheckingInterestCalculator";
     }
 
     @Override

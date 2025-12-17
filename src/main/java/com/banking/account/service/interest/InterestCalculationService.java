@@ -1,4 +1,4 @@
-package com.banking.account.service;
+package com.banking.account.service.interest;
 
 import com.banking.account.module.entity.Account;
 import com.banking.account.module.entity.InterestCalculation;
@@ -6,13 +6,11 @@ import com.banking.core.enums.AccountEventType;
 import com.banking.core.enums.AccountState;
 import com.banking.core.enums.CalculationStatus;
 import com.banking.core.exception.InterestCalculationException;
-import com.banking.core.exception.NoSuitableStrategyException;
-import com.banking.observer.AccountObserver;
 import com.banking.observer.event.AccountEvent;
-import com.banking.observer.AccountSubject;
 import com.banking.account.repository.AccountRepository;
 import com.banking.account.repository.InterestCalculationRepository;
-import com.banking.strategy.InterestCalculationStrategy;
+import com.banking.account.service.interest.calculator.InterestCalculator;
+import com.banking.account.service.AccountSubjectManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -29,11 +27,11 @@ import java.util.concurrent.atomic.AtomicReference;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class DailyInterestCalculationService {
+public class InterestCalculationService {
 
     private final AccountRepository accountRepository;
     private final InterestCalculationRepository interestCalculationRepository;
-    private final List<InterestCalculationStrategy> strategies;
+    private final List<InterestCalculator> calculators;
     private final AccountSubjectManager accountSubjectManager;
 
     @Scheduled(cron = "0 0 2 * * ?")
@@ -130,12 +128,12 @@ public class DailyInterestCalculationService {
             return CalculationResult.skipped("Already calculated for this date");
         }
 
-        // Find suitable strategy
-        InterestCalculationStrategy strategy = findSuitableStrategy(account);
-        if (strategy == null) {
-            log.warn("No suitable strategy found for account type: {}",
+        // Find suitable calculator
+        InterestCalculator calculator = findSuitableCalculator(account);
+        if (calculator == null) {
+            log.warn("No suitable calculator found for account type: {}",
                     account.getAccountType() != null ? account.getAccountType().getCode() : "null");
-            return CalculationResult.skipped("No suitable strategy found");
+            return CalculationResult.skipped("No suitable calculator found");
         }
 
         long startTime = System.currentTimeMillis();
@@ -143,7 +141,7 @@ public class DailyInterestCalculationService {
         try {
             // Calculate interest
             BigDecimal previousBalance = account.getBalance();
-            BigDecimal interestAmount = strategy.calculateInterest(account, calculationDate);
+            BigDecimal interestAmount = calculator.calculateInterest(account, calculationDate);
 
             // Skip if interest is zero or negative
             if (interestAmount == null || interestAmount.compareTo(BigDecimal.ZERO) <= 0) {
@@ -165,7 +163,7 @@ public class DailyInterestCalculationService {
             long duration = System.currentTimeMillis() - startTime;
 
             // Save calculation record
-            saveSuccessfulCalculation(account, interestAmount, strategy.getStrategyName(),
+            saveSuccessfulCalculation(account, interestAmount, calculator.getCalculatorName(),
                     calculationDate, previousBalance, newBalance, duration);
 
             // Notify observers about the interest calculation
@@ -182,15 +180,15 @@ public class DailyInterestCalculationService {
     }
 
     /**
-     * Find suitable strategy for account type
+     * Find suitable calculator for account type
      */
-    private InterestCalculationStrategy findSuitableStrategy(Account account) {
+    private InterestCalculator findSuitableCalculator(Account account) {
         if (account.getAccountType() == null) {
             return null;
         }
 
-        return strategies.stream()
-                .filter(strategy -> strategy.supports(account.getAccountType()))
+        return calculators.stream()
+                .filter(calculator -> calculator.supports(account.getAccountType()))
                 .findFirst()
                 .orElse(null);
     }
@@ -199,14 +197,14 @@ public class DailyInterestCalculationService {
      * Save successful calculation record
      */
     private void saveSuccessfulCalculation(Account account, BigDecimal interestAmount,
-            String strategyName, LocalDate calculationDate,
+            String calculatorName, LocalDate calculationDate,
             BigDecimal previousBalance, BigDecimal newBalance,
             long durationMs) {
         InterestCalculation calculation = new InterestCalculation();
         calculation.setAccount(account);
         calculation.setInterestAmount(interestAmount);
         calculation.setCalculationDate(calculationDate);
-        calculation.setStrategyUsed(strategyName);
+        calculation.setStrategyUsed(calculatorName);
         calculation.setStatus(CalculationStatus.SUCCESS);
         calculation.setPreviousBalance(previousBalance);
         calculation.setNewBalance(newBalance);

@@ -7,7 +7,7 @@ import com.banking.account.module.entity.InterestCalculation;
 import com.banking.core.enums.CalculationStatus;
 import com.banking.account.repository.AccountRepository;
 import com.banking.account.repository.InterestCalculationRepository;
-import com.banking.account.service.DailyInterestCalculationService;
+import com.banking.account.service.interest.InterestCalculationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class InterestCalculationController {
 
-        private final DailyInterestCalculationService interestCalculationService;
+        private final InterestCalculationService interestCalculationService;
         private final InterestCalculationRepository interestCalculationRepository;
         private final AccountRepository accountRepository;
 
@@ -128,7 +128,7 @@ public class InterestCalculationController {
                         Account account = accountRepository.findByAccountNumber(accountNumber)
                                         .orElseThrow(() -> new RuntimeException("Account not found: " + accountNumber));
 
-                        DailyInterestCalculationService.CalculationResult result = interestCalculationService
+                        InterestCalculationService.CalculationResult result = interestCalculationService
                                         .calculateInterestForAccount(account, LocalDate.now());
 
                         if (result.isSkipped()) {

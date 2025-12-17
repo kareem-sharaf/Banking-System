@@ -1,8 +1,7 @@
-package com.banking.strategy.impl;
+package com.banking.account.service.interest.calculator;
 
 import com.banking.account.module.entity.Account;
 import com.banking.account.module.entity.AccountType;
-import com.banking.strategy.InterestCalculationStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +11,7 @@ import java.time.LocalDate;
 
 @Component
 @Slf4j
-public class LoanInterestStrategy implements InterestCalculationStrategy {
+public class LoanInterestCalculator implements InterestCalculator {
 
     private static final BigDecimal DEFAULT_INTEREST_RATE = new BigDecimal("0.08"); // 8% annual
     private static final BigDecimal DAYS_IN_YEAR = new BigDecimal("365");
@@ -66,8 +65,8 @@ public class LoanInterestStrategy implements InterestCalculationStrategy {
     }
 
     @Override
-    public String getStrategyName() {
-        return "LoanInterestStrategy";
+    public String getCalculatorName() {
+        return "LoanInterestCalculator";
     }
 
     @Override
