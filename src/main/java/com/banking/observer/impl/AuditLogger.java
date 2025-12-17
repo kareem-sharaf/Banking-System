@@ -1,14 +1,14 @@
 package com.banking.observer.impl;
 
-import com.banking.entity.Account;
-import com.banking.entity.AuditLog;
-import com.banking.entity.Transaction;
-import com.banking.entity.User;
-import com.banking.enums.AccountEventType;
-import com.banking.enums.ActionType;
+import com.banking.account.module.entity.Account;
+import com.banking.core.module.entity.AuditLog;
+import com.banking.transaction.module.entity.Transaction;
+import com.banking.core.auth.module.entity.User;
+import com.banking.core.enums.AccountEventType;
+import com.banking.core.enums.ActionType;
 import com.banking.observer.AccountObserver;
 import com.banking.observer.event.AccountEvent;
-import com.banking.repository.AuditLogRepository;
+import com.banking.core.repository.AuditLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

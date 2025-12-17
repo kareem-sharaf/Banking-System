@@ -1,8 +1,8 @@
 package com.banking.observer.event;
 
-import com.banking.entity.Account;
-import com.banking.entity.Transaction;
-import com.banking.enums.AccountEventType;
+import com.banking.account.module.entity.Account;
+import com.banking.transaction.module.entity.Transaction;
+import com.banking.core.enums.AccountEventType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

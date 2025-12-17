@@ -1,9 +1,17 @@
 package com.banking.config;
 
-import com.banking.dto.RegisterRequest;
-import com.banking.entity.*;
-import com.banking.repository.*;
-import com.banking.service.KeycloakAdminService;
+import com.banking.core.auth.dto.RegisterRequest;
+import com.banking.core.auth.module.entity.Role;
+import com.banking.core.auth.module.entity.Permission;
+import com.banking.core.auth.module.entity.RolePermission;
+import com.banking.core.auth.module.entity.User;
+import com.banking.account.module.entity.AccountType;
+import com.banking.account.repository.AccountTypeRepository;
+import com.banking.core.auth.repository.RoleRepository;
+import com.banking.core.auth.repository.PermissionRepository;
+import com.banking.core.auth.repository.RolePermissionRepository;
+import com.banking.core.auth.repository.UserRepository;
+import com.banking.core.auth.service.KeycloakAdminService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

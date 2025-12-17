@@ -1,7 +1,7 @@
 package com.banking.strategy.impl;
 
-import com.banking.entity.Account;
-import com.banking.entity.AccountType;
+import com.banking.account.module.entity.Account;
+import com.banking.account.module.entity.AccountType;
 import com.banking.strategy.InterestCalculationStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

@@ -1,7 +1,7 @@
 package com.banking.strategy;
 
-import com.banking.entity.Account;
-import com.banking.entity.AccountType;
+import com.banking.account.module.entity.Account;
+import com.banking.account.module.entity.AccountType;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
