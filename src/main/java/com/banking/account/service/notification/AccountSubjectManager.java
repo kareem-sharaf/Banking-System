@@ -1,6 +1,8 @@
 package com.banking.account.service.notification;
 
 import com.banking.account.module.entity.Account;
+import com.banking.account.service.notification.handler.CompositeNotificationHandler;
+import com.banking.core.enums.AccountEventType;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -183,5 +185,107 @@ public class AccountSubjectManager implements AccountSubject {
 
         accountObservers.remove(account.getId());
         logger.debug("Cleared observers for account {}", account.getAccountNumber());
+    }
+
+    /**
+     * Attach composite notification handler for urgent events
+     * Creates a composite that includes email, SMS, and in-app notifications
+     */
+    public void attachUrgentNotificationHandler(Account account) {
+        if (account == null || account.getId() == null) {
+            logger.warn("Cannot attach urgent notification handler: Account or account ID is null");
+            return;
+        }
+
+        // Find available handlers
+        AccountObserver emailHandler = allObservers.stream()
+                .filter(observer -> "EMAIL".equals(observer.getObserverType()))
+                .findFirst().orElse(null);
+
+        AccountObserver smsHandler = allObservers.stream()
+                .filter(observer -> "SMS".equals(observer.getObserverType()))
+                .findFirst().orElse(null);
+
+        AccountObserver inAppHandler = allObservers.stream()
+                .filter(observer -> "IN_APP".equals(observer.getObserverType()))
+                .findFirst().orElse(null);
+
+        if (emailHandler != null || smsHandler != null || inAppHandler != null) {
+            CompositeNotificationHandler urgentHandler =
+                    CompositeNotificationHandler.createUrgentNotificationHandler(
+                            emailHandler, smsHandler, inAppHandler);
+
+            attach(account, urgentHandler);
+            logger.debug("Attached urgent notification composite to account {}", account.getAccountNumber());
+        } else {
+            logger.warn("No notification handlers available for urgent notifications");
+        }
+    }
+
+    /**
+     * Attach composite notification handler for standard events
+     * Creates a composite that includes email and in-app notifications
+     */
+    public void attachStandardNotificationHandler(Account account) {
+        if (account == null || account.getId() == null) {
+            logger.warn("Cannot attach standard notification handler: Account or account ID is null");
+            return;
+        }
+
+        // Find available handlers
+        AccountObserver emailHandler = allObservers.stream()
+                .filter(observer -> "EMAIL".equals(observer.getObserverType()))
+                .findFirst().orElse(null);
+
+        AccountObserver inAppHandler = allObservers.stream()
+                .filter(observer -> "IN_APP".equals(observer.getObserverType()))
+                .findFirst().orElse(null);
+
+        if (emailHandler != null || inAppHandler != null) {
+            CompositeNotificationHandler standardHandler =
+                    CompositeNotificationHandler.createStandardNotificationHandler(
+                            emailHandler, inAppHandler);
+
+            attach(account, standardHandler);
+            logger.debug("Attached standard notification composite to account {}", account.getAccountNumber());
+        } else {
+            logger.warn("No notification handlers available for standard notifications");
+        }
+    }
+
+    /**
+     * Attach appropriate notification handler based on event type
+     */
+    public void attachNotificationHandlerForEvent(Account account, AccountEventType eventType) {
+        if (eventType == null) {
+            attachStandardNotificationHandler(account);
+            return;
+        }
+
+        switch (eventType) {
+            case SUSPICIOUS_ACTIVITY:
+            case LOW_BALANCE:
+                attachUrgentNotificationHandler(account);
+                break;
+            default:
+                attachStandardNotificationHandler(account);
+                break;
+        }
+    }
+
+    /**
+     * Create a custom composite notification handler
+     */
+    public CompositeNotificationHandler createCustomCompositeHandler(String name,
+            AccountObserver... handlers) {
+        CompositeNotificationHandler composite = new CompositeNotificationHandler(name);
+        for (AccountObserver handler : handlers) {
+            if (handler != null) {
+                composite.addHandler(handler);
+            }
+        }
+        logger.debug("Created custom composite notification handler {} with {} handlers",
+                name, composite.getHandlerCount());
+        return composite;
     }
 }
