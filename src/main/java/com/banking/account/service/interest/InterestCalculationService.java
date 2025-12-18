@@ -11,6 +11,9 @@ import com.banking.account.service.notification.AccountSubjectManager;
 import com.banking.account.repository.AccountRepository;
 import com.banking.account.repository.InterestCalculationRepository;
 import com.banking.account.service.interest.calculator.InterestCalculator;
+import com.banking.account.service.interest.calculator.BonusInterestCalculator;
+import com.banking.account.service.interest.calculator.PenaltyInterestCalculator;
+import com.banking.account.service.interest.calculator.CompositeInterestCalculator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -33,6 +36,8 @@ public class InterestCalculationService {
     private final InterestCalculationRepository interestCalculationRepository;
     private final List<InterestCalculator> calculators;
     private final AccountSubjectManager accountSubjectManager;
+    private final BonusInterestCalculator bonusCalculator;
+    private final PenaltyInterestCalculator penaltyCalculator;
 
     @Scheduled(cron = "0 0 2 * * ?")
     @Transactional
@@ -181,16 +186,48 @@ public class InterestCalculationService {
 
     /**
      * Find suitable calculator for account type
+     * Uses composite pattern to combine base calculator with bonus and penalty calculators
      */
     private InterestCalculator findSuitableCalculator(Account account) {
         if (account.getAccountType() == null) {
             return null;
         }
 
-        return calculators.stream()
+        // Find the base calculator for this account type
+        InterestCalculator baseCalculator = calculators.stream()
                 .filter(calculator -> calculator.supports(account.getAccountType()))
                 .findFirst()
                 .orElse(null);
+
+        if (baseCalculator == null) {
+            return null;
+        }
+
+        // Create a composite calculator that includes base calculator + bonuses/penalties
+        CompositeInterestCalculator compositeCalculator =
+                new CompositeInterestCalculator("Composite_" + baseCalculator.getCalculatorName());
+
+        // Always add the base calculator
+        compositeCalculator.addCalculator(baseCalculator);
+
+        // Add bonus calculator for all account types
+        if (bonusCalculator.supports(account.getAccountType())) {
+            compositeCalculator.addCalculator(bonusCalculator);
+        }
+
+        // Add penalty calculator for applicable account types
+        if (penaltyCalculator.supports(account.getAccountType())) {
+            compositeCalculator.addCalculator(penaltyCalculator);
+        }
+
+        log.debug("Created composite calculator for account {} with {} calculators: base={}, bonus={}, penalty={}",
+                account.getAccountNumber(),
+                compositeCalculator.getCalculatorCount(),
+                baseCalculator.getCalculatorName(),
+                bonusCalculator.supports(account.getAccountType()),
+                penaltyCalculator.supports(account.getAccountType()));
+
+        return compositeCalculator;
     }
 
     /**
