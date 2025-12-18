@@ -1,11 +1,11 @@
 package com.banking.core.auth.controller;
 
+import com.banking.core.auth.adapter.AuthenticationProvider;
+import com.banking.core.auth.adapter.dto.*;
 import com.banking.core.auth.dto.AuthResponse;
 import com.banking.core.auth.dto.LoginRequest;
 import com.banking.core.auth.dto.RegisterRequest;
 import com.banking.core.auth.module.entity.User;
-import com.banking.core.auth.service.KeycloakAdminService;
-import com.banking.core.auth.service.KeycloakTokenService;
 import com.banking.core.auth.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -26,22 +26,19 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Authentication Controller - Endpoints for user registration and login via
- * Keycloak
+ * Authentication Controller - Endpoints for user registration and login
+ * Uses AuthenticationProvider adapter pattern to abstract authentication operations
  */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final KeycloakAdminService keycloakAdminService;
-    private final KeycloakTokenService keycloakTokenService;
+    private final AuthenticationProvider authenticationProvider;
     private final UserService userService;
 
-    public AuthController(KeycloakAdminService keycloakAdminService,
-            KeycloakTokenService keycloakTokenService,
+    public AuthController(AuthenticationProvider authenticationProvider,
             UserService userService) {
-        this.keycloakAdminService = keycloakAdminService;
-        this.keycloakTokenService = keycloakTokenService;
+        this.authenticationProvider = authenticationProvider;
         this.userService = userService;
     }
 
@@ -138,8 +135,8 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest,
             HttpServletRequest request) {
-        // Check if username already exists in Keycloak
-        if (keycloakAdminService.usernameExists(registerRequest.getUsername())) {
+        // Check if username already exists using authentication provider
+        if (authenticationProvider.usernameExists(registerRequest.getUsername())) {
             Map<String, String> error = new HashMap<>();
             error.put("error", "Username already exists");
             error.put("message", "The username '" + registerRequest.getUsername() + "' is already taken");
@@ -154,14 +151,27 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
         }
 
-        // Create user in Keycloak
-        Map<String, Object> createResult = keycloakAdminService.createUser(registerRequest);
+        // Convert RegisterRequest to UserRegistrationRequest
+        UserRegistrationRequest userRegistrationRequest = UserRegistrationRequest.builder()
+                .username(registerRequest.getUsername())
+                .email(registerRequest.getEmail())
+                .password(registerRequest.getPassword())
+                .firstName(registerRequest.getFirstName())
+                .lastName(registerRequest.getLastName())
+                .phoneNumber(registerRequest.getPhoneNumber())
+                .role(registerRequest.getRole() != null ? registerRequest.getRole() : "CUSTOMER")
+                .emailVerified(true)
+                .enabled(true)
+                .build();
 
-        if ((Boolean) createResult.getOrDefault("success", false)) {
-            String keycloakId = (String) createResult.get("userId");
+        // Create user using authentication provider
+        UserRegistrationResult createResult = authenticationProvider.createUser(userRegistrationRequest);
+
+        if (createResult.isSuccess()) {
+            String providerUserId = createResult.getUserId();
 
             // Save user in local database
-            User localUser = userService.createLocalUser(registerRequest, keycloakId);
+            User localUser = userService.createLocalUser(registerRequest, providerUserId);
 
             if (localUser != null) {
                 // Record registration in LoginHistory
@@ -169,19 +179,19 @@ public class AuthController {
                 String userAgent = userService.getUserAgent(request);
                 userService.updateLoginHistory(localUser, ipAddress, userAgent, true, null);
 
-                // Get token from Keycloak after successful registration
-                Map<String, Object> tokenResponse = keycloakTokenService.getAccessToken(
+                // Get token from authentication provider after successful registration
+                TokenResponse tokenResponse = authenticationProvider.authenticate(
                         registerRequest.getUsername(),
                         registerRequest.getPassword());
 
-                if (tokenResponse.containsKey("access_token")) {
+                if (tokenResponse.isSuccess()) {
                     // Success - return token + user info
                     AuthResponse authResponse = new AuthResponse();
-                    authResponse.setAccessToken((String) tokenResponse.get("access_token"));
-                    authResponse.setRefreshToken((String) tokenResponse.get("refresh_token"));
-                    authResponse.setExpiresIn(((Number) tokenResponse.get("expires_in")).longValue());
-                    authResponse.setTokenType("Bearer");
-                    authResponse.setScope((String) tokenResponse.get("scope"));
+                    authResponse.setAccessToken(tokenResponse.getAccessToken());
+                    authResponse.setRefreshToken(tokenResponse.getRefreshToken());
+                    authResponse.setExpiresIn(tokenResponse.getExpiresIn());
+                    authResponse.setTokenType(tokenResponse.getTokenType() != null ? tokenResponse.getTokenType() : "Bearer");
+                    authResponse.setScope(tokenResponse.getScope());
                     authResponse.setMessage("User registered and logged in successfully");
 
                     // Add user info
@@ -204,19 +214,23 @@ public class AuthController {
                     response.put("username", localUser.getUsername());
                     response.put("email", localUser.getEmail());
                     response.put("warning", "Token retrieval failed: "
-                            + tokenResponse.getOrDefault("error_description", "Unknown error"));
+                            + (tokenResponse.getErrorDescription() != null ? tokenResponse.getErrorDescription() : "Unknown error"));
                     return ResponseEntity.status(HttpStatus.CREATED).body(response);
                 }
             } else {
-                // Keycloak user created but local user creation failed
+                // Provider user created but local user creation failed
                 Map<String, Object> response = new HashMap<>();
                 response.put("success", false);
                 response.put("message",
-                        "User created in Keycloak but failed to save locally. Please contact administrator.");
+                        "User created in " + authenticationProvider.getProviderName() + " but failed to save locally. Please contact administrator.");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
             }
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(createResult);
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("error", createResult.getError());
+            error.put("message", createResult.getMessage() != null ? createResult.getMessage() : createResult.getErrorDescription());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         }
     }
 
@@ -233,19 +247,19 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest,
             HttpServletRequest request) {
-        Map<String, Object> tokenResponse = keycloakTokenService.getAccessToken(
+        TokenResponse tokenResponse = authenticationProvider.authenticate(
                 loginRequest.getUsername(),
                 loginRequest.getPassword());
 
-        if (tokenResponse.containsKey("access_token")) {
-            String accessToken = (String) tokenResponse.get("access_token");
+        if (tokenResponse.isSuccess()) {
+            String accessToken = tokenResponse.getAccessToken();
 
             // Get user info from token
-            Map<String, Object> userInfo = keycloakAdminService.getUserInfoFromToken(accessToken);
-            String keycloakId = (String) userInfo.get("sub");
+            UserInfo userInfo = authenticationProvider.getUserInfo(accessToken);
+            String providerUserId = userInfo.getUserId();
 
             // Find or create local user
-            Optional<User> userOpt = userService.findByKeycloakId(keycloakId);
+            Optional<User> userOpt = userService.findByKeycloakId(providerUserId);
             User user;
 
             if (userOpt.isPresent()) {
@@ -253,11 +267,11 @@ public class AuthController {
                 // Update last login time
                 userService.updateLastLoginAt(user);
             } else {
-                // User exists in Keycloak but not in local DB - try to find by username
+                // User exists in provider but not in local DB - try to find by username
                 userOpt = userService.findByUsername(loginRequest.getUsername());
                 if (userOpt.isPresent()) {
                     user = userOpt.get();
-                    user.setKeycloakId(keycloakId);
+                    user.setKeycloakId(providerUserId);
                     userService.updateLastLoginAt(user);
                 } else {
                     // User not found locally - this shouldn't happen if registration worked
@@ -274,10 +288,10 @@ public class AuthController {
 
             AuthResponse authResponse = new AuthResponse();
             authResponse.setAccessToken(accessToken);
-            authResponse.setRefreshToken((String) tokenResponse.get("refresh_token"));
-            authResponse.setExpiresIn(((Number) tokenResponse.get("expires_in")).longValue());
-            authResponse.setTokenType("Bearer");
-            authResponse.setScope((String) tokenResponse.get("scope"));
+            authResponse.setRefreshToken(tokenResponse.getRefreshToken());
+            authResponse.setExpiresIn(tokenResponse.getExpiresIn());
+            authResponse.setTokenType(tokenResponse.getTokenType() != null ? tokenResponse.getTokenType() : "Bearer");
+            authResponse.setScope(tokenResponse.getScope());
             authResponse.setMessage("Login successful");
 
             // Add basic user info
@@ -289,8 +303,8 @@ public class AuthController {
                 userData.put("firstName", user.getFirstName());
                 userData.put("lastName", user.getLastName());
             } else {
-                userData.put("username", userInfo.get("preferred_username"));
-                userData.put("email", userInfo.get("email"));
+                userData.put("username", userInfo.getUsername());
+                userData.put("email", userInfo.getEmail());
             }
             authResponse.setUserInfo(userData);
 
@@ -301,15 +315,18 @@ public class AuthController {
             if (userOpt.isPresent()) {
                 String ipAddress = userService.getClientIpAddress(request);
                 String userAgent = userService.getUserAgent(request);
-                String failureReason = tokenResponse.getOrDefault("error_description", "Invalid credentials")
-                        .toString();
+                String failureReason = tokenResponse.getErrorDescription() != null 
+                        ? tokenResponse.getErrorDescription() 
+                        : "Invalid credentials";
                 userService.updateLoginHistory(userOpt.get(), ipAddress, userAgent, false, failureReason);
             }
 
             Map<String, String> error = new HashMap<>();
             error.put("error", "Invalid credentials");
             error.put("message",
-                    tokenResponse.getOrDefault("error_description", "Invalid username or password").toString());
+                    tokenResponse.getErrorDescription() != null 
+                            ? tokenResponse.getErrorDescription() 
+                            : "Invalid username or password");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
         }
     }
@@ -328,19 +345,22 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         }
 
-        Map<String, Object> tokenResponse = keycloakTokenService.refreshToken(refreshToken);
+        TokenResponse tokenResponse = authenticationProvider.refreshToken(refreshToken);
 
-        if (tokenResponse.containsKey("access_token")) {
+        if (tokenResponse.isSuccess()) {
             AuthResponse authResponse = new AuthResponse();
-            authResponse.setAccessToken((String) tokenResponse.get("access_token"));
-            authResponse.setRefreshToken((String) tokenResponse.get("refresh_token"));
-            authResponse.setExpiresIn(((Number) tokenResponse.get("expires_in")).longValue());
-            authResponse.setTokenType("Bearer");
+            authResponse.setAccessToken(tokenResponse.getAccessToken());
+            authResponse.setRefreshToken(tokenResponse.getRefreshToken());
+            authResponse.setExpiresIn(tokenResponse.getExpiresIn());
+            authResponse.setTokenType(tokenResponse.getTokenType() != null ? tokenResponse.getTokenType() : "Bearer");
             authResponse.setMessage("Token refreshed successfully");
 
             return ResponseEntity.ok(authResponse);
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(tokenResponse);
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", tokenResponse.getError());
+            error.put("message", tokenResponse.getErrorDescription());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
         }
     }
 
@@ -363,16 +383,16 @@ public class AuthController {
 
         String token = authHeader.substring(7);
 
-        // Validate token with Keycloak
-        boolean isValid = keycloakAdminService.validateToken(token);
+        // Validate token using authentication provider
+        boolean isValid = authenticationProvider.validateToken(token);
 
         if (isValid) {
             // Get user info from token
-            Map<String, Object> userInfo = keycloakAdminService.getUserInfoFromToken(token);
-            String keycloakId = (String) userInfo.get("sub");
+            UserInfo userInfo = authenticationProvider.getUserInfo(token);
+            String providerUserId = userInfo.getUserId();
 
             // Get local user data
-            Optional<User> userOpt = userService.findByKeycloakId(keycloakId);
+            Optional<User> userOpt = userService.findByKeycloakId(providerUserId);
 
             Map<String, Object> response = new HashMap<>();
             response.put("valid", true);
@@ -389,8 +409,12 @@ public class AuthController {
                 userData.put("active", user.isActive());
                 response.put("user", userData);
             } else {
-                // User exists in Keycloak but not in local DB
-                response.put("user", userInfo);
+                // User exists in provider but not in local DB
+                Map<String, Object> providerUserData = new HashMap<>();
+                providerUserData.put("userId", userInfo.getUserId());
+                providerUserData.put("username", userInfo.getUsername());
+                providerUserData.put("email", userInfo.getEmail());
+                response.put("user", providerUserData);
                 response.put("warning", "User not found in local database");
             }
 
@@ -430,10 +454,10 @@ public class AuthController {
             keycloakId = jwt.getSubject();
         }
 
-        // Logout from Keycloak if refresh token provided
-        boolean keycloakLogoutSuccess = true;
+        // Logout from authentication provider if refresh token provided
+        boolean providerLogoutSuccess = true;
         if (refreshToken != null && !refreshToken.isEmpty()) {
-            keycloakLogoutSuccess = keycloakAdminService.logout(refreshToken);
+            providerLogoutSuccess = authenticationProvider.logout(refreshToken);
         }
 
         // Update logout time in local database
@@ -447,8 +471,8 @@ public class AuthController {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("message", "Logged out successfully");
-        if (!keycloakLogoutSuccess && refreshToken != null) {
-            response.put("warning", "Keycloak logout may have failed, but local logout recorded");
+        if (!providerLogoutSuccess && refreshToken != null) {
+            response.put("warning", authenticationProvider.getProviderName() + " logout may have failed, but local logout recorded");
         }
 
         return ResponseEntity.ok(response);
