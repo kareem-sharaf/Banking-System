@@ -10,6 +10,7 @@ import com.banking.core.enums.AccountEventType;
 import com.banking.core.enums.AccountState;
 import com.banking.core.enums.TransactionStatus;
 import com.banking.core.enums.TransactionType;
+import com.banking.core.enums.ApprovalStatus;
 import com.banking.core.exception.AccountNotFoundException;
 import com.banking.core.exception.InsufficientBalanceException;
 import com.banking.core.exception.InvalidAccountStateException;
@@ -17,6 +18,8 @@ import com.banking.account.service.notification.AccountEvent;
 import com.banking.account.service.notification.AccountSubjectManager;
 import com.banking.account.repository.AccountRepository;
 import com.banking.transaction.repository.TransactionRepository;
+import com.banking.transaction.service.TransactionApprovalService;
+import com.banking.transaction.approval.ApprovalResult;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +50,7 @@ public class AccountService {
         private final AccountRepository accountRepository;
         private final TransactionRepository transactionRepository;
         private final AccountSubjectManager accountSubjectManager;
+        private final TransactionApprovalService transactionApprovalService;
 
         /**
          * Deposit money into an account
@@ -76,50 +80,76 @@ public class AccountService {
 
                 // 3. Store previous balance for event
                 BigDecimal previousBalance = account.getBalance();
-
-                // 4. Perform deposit
                 BigDecimal depositAmount = request.getAmount();
-                BigDecimal newBalance = previousBalance.add(depositAmount);
-                account.setBalance(newBalance);
-                account.setUpdatedAt(LocalDateTime.now());
 
-                // 5. Create transaction record
+                // 4. Create transaction record (initially as PENDING)
                 Transaction transaction = createTransaction(
                                 account,
                                 null, // No destination account for deposit
                                 TransactionType.DEPOSIT,
                                 depositAmount,
                                 request.getDescription() != null ? request.getDescription() : "Deposit",
-                                TransactionStatus.COMPLETED);
+                                TransactionStatus.PENDING);
+
+                // 5. Process approval through chain
+                ApprovalResult approvalResult = transactionApprovalService.processApproval(transaction);
+
+                // 6. Handle approval result
+                BigDecimal newBalance;
+                if (approvalResult.isApproved() && approvalResult.getStatus() == ApprovalStatus.AUTO_APPROVED) {
+                        // Auto-approved: Execute the deposit
+                        newBalance = previousBalance.add(depositAmount);
+                        account.setBalance(newBalance);
+                        account.setUpdatedAt(LocalDateTime.now());
+                        transaction.setStatus(TransactionStatus.COMPLETED);
+                } else if (approvalResult.isPending()) {
+                        // Pending approval: Don't execute, keep transaction as PENDING
+                        newBalance = previousBalance; // Balance unchanged
+                        logger.info("Deposit transaction {} is pending approval", transaction.getTransactionNumber());
+                } else if (approvalResult.isRejected()) {
+                        // Rejected: Don't execute
+                        throw new IllegalStateException("Transaction rejected: " + approvalResult.getMessage());
+                } else {
+                        // Should not happen, but handle gracefully
+                        newBalance = previousBalance;
+                        transaction.setStatus(TransactionStatus.PENDING);
+                }
 
                 transaction = transactionRepository.save(transaction);
                 account = accountRepository.save(account);
 
-                // 6. Attach observers if not already attached
-                accountSubjectManager.attachAllObservers(account);
+                // 7. Only notify observers if transaction was auto-approved and completed
+                if (approvalResult.isApproved() && approvalResult.getStatus() == ApprovalStatus.AUTO_APPROVED) {
+                        // Attach observers if not already attached
+                        accountSubjectManager.attachAllObservers(account);
 
-                // 7. Create and notify observers about the event
-                AccountEvent event = AccountEvent.builder()
-                                .eventType(AccountEventType.DEPOSIT_COMPLETED)
-                                .account(account)
-                                .transaction(transaction)
-                                .timestamp(LocalDateTime.now())
-                                .amount(depositAmount)
-                                .previousBalance(previousBalance)
-                                .newBalance(newBalance)
-                                .message("Deposit of " + depositAmount + " " + account.getCurrency()
-                                                + " completed successfully")
-                                .build();
+                        // Create and notify observers about the event
+                        AccountEvent event = AccountEvent.builder()
+                                        .eventType(AccountEventType.DEPOSIT_COMPLETED)
+                                        .account(account)
+                                        .transaction(transaction)
+                                        .timestamp(LocalDateTime.now())
+                                        .amount(depositAmount)
+                                        .previousBalance(previousBalance)
+                                        .newBalance(newBalance)
+                                        .message("Deposit of " + depositAmount + " " + account.getCurrency()
+                                                        + " completed successfully")
+                                        .build();
 
-                accountSubjectManager.notifyObservers(event);
+                        accountSubjectManager.notifyObservers(event);
 
-                logger.info("Deposit completed successfully for account: {}. New balance: {}",
-                                accountNumber, newBalance);
+                        logger.info("Deposit completed successfully for account: {}. New balance: {}",
+                                        accountNumber, newBalance);
+                }
 
                 // 8. Return response
+                String message = approvalResult.isApproved()
+                                ? "Deposit completed successfully"
+                                : "Deposit request submitted and pending approval";
+
                 return TransactionResponse.builder()
-                                .success(true)
-                                .message("Deposit completed successfully")
+                                .success(approvalResult.isApproved())
+                                .message(message)
                                 .newBalance(newBalance)
                                 .transactionNumber(transaction.getTransactionNumber())
                                 .accountNumber(account.getAccountNumber())
@@ -162,51 +192,78 @@ public class AccountService {
                 // 4. Store previous balance
                 BigDecimal previousBalance = currentBalance;
 
-                // 5. Perform withdrawal
-                BigDecimal newBalance = previousBalance.subtract(withdrawalAmount);
-                account.setBalance(newBalance);
-                account.setUpdatedAt(LocalDateTime.now());
-
-                // 6. Create transaction record
+                // 5. Create transaction record (initially as PENDING)
                 Transaction transaction = createTransaction(
                                 account,
                                 null, // No destination account for withdrawal
                                 TransactionType.WITHDRAWAL,
                                 withdrawalAmount,
                                 request.getDescription() != null ? request.getDescription() : "Withdrawal",
-                                TransactionStatus.COMPLETED);
+                                TransactionStatus.PENDING);
+
+                // 6. Process approval through chain
+                ApprovalResult approvalResult = transactionApprovalService.processApproval(transaction);
+
+                // 7. Handle approval result
+                BigDecimal newBalance;
+                if (approvalResult.isApproved() && approvalResult.getStatus() == ApprovalStatus.AUTO_APPROVED) {
+                        // Auto-approved: Execute the withdrawal
+                        newBalance = previousBalance.subtract(withdrawalAmount);
+                        account.setBalance(newBalance);
+                        account.setUpdatedAt(LocalDateTime.now());
+                        transaction.setStatus(TransactionStatus.COMPLETED);
+                } else if (approvalResult.isPending()) {
+                        // Pending approval: Don't execute, keep transaction as PENDING
+                        newBalance = previousBalance; // Balance unchanged
+                        logger.info("Withdrawal transaction {} is pending approval",
+                                        transaction.getTransactionNumber());
+                } else if (approvalResult.isRejected()) {
+                        // Rejected: Don't execute
+                        throw new IllegalStateException("Transaction rejected: " + approvalResult.getMessage());
+                } else {
+                        // Should not happen, but handle gracefully
+                        newBalance = previousBalance;
+                        transaction.setStatus(TransactionStatus.PENDING);
+                }
 
                 transaction = transactionRepository.save(transaction);
                 account = accountRepository.save(account);
 
-                // 7. Attach observers if not already attached
-                accountSubjectManager.attachAllObservers(account);
+                // 8. Only notify observers if transaction was auto-approved and completed
+                if (approvalResult.isApproved() && approvalResult.getStatus() == ApprovalStatus.AUTO_APPROVED) {
+                        // Attach observers if not already attached
+                        accountSubjectManager.attachAllObservers(account);
 
-                // 8. Create and notify observers
-                AccountEvent event = AccountEvent.builder()
-                                .eventType(AccountEventType.WITHDRAWAL_COMPLETED)
-                                .account(account)
-                                .transaction(transaction)
-                                .timestamp(LocalDateTime.now())
-                                .amount(withdrawalAmount)
-                                .previousBalance(previousBalance)
-                                .newBalance(newBalance)
-                                .message("Withdrawal of " + withdrawalAmount + " " + account.getCurrency()
-                                                + " completed successfully")
-                                .build();
+                        // Create and notify observers
+                        AccountEvent event = AccountEvent.builder()
+                                        .eventType(AccountEventType.WITHDRAWAL_COMPLETED)
+                                        .account(account)
+                                        .transaction(transaction)
+                                        .timestamp(LocalDateTime.now())
+                                        .amount(withdrawalAmount)
+                                        .previousBalance(previousBalance)
+                                        .newBalance(newBalance)
+                                        .message("Withdrawal of " + withdrawalAmount + " " + account.getCurrency()
+                                                        + " completed successfully")
+                                        .build();
 
-                accountSubjectManager.notifyObservers(event);
+                        accountSubjectManager.notifyObservers(event);
 
-                logger.info("Withdrawal completed successfully for account: {}. New balance: {}",
-                                accountNumber, newBalance);
+                        logger.info("Withdrawal completed successfully for account: {}. New balance: {}",
+                                        accountNumber, newBalance);
 
-                // 9. Check for low balance and notify if needed
-                checkAndNotifyLowBalance(account, newBalance);
+                        // Check for low balance and notify if needed
+                        checkAndNotifyLowBalance(account, newBalance);
+                }
 
-                // 10. Return response
+                // 9. Return response
+                String message = approvalResult.isApproved()
+                                ? "Withdrawal completed successfully"
+                                : "Withdrawal request submitted and pending approval";
+
                 return TransactionResponse.builder()
-                                .success(true)
-                                .message("Withdrawal completed successfully")
+                                .success(approvalResult.isApproved())
+                                .message(message)
                                 .newBalance(newBalance)
                                 .transactionNumber(transaction.getTransactionNumber())
                                 .accountNumber(account.getAccountNumber())
@@ -265,72 +322,101 @@ public class AccountService {
                 BigDecimal fromPreviousBalance = fromAccount.getBalance();
                 BigDecimal toPreviousBalance = toAccount.getBalance();
 
-                // 8. Perform transfer
-                BigDecimal fromNewBalance = fromPreviousBalance.subtract(transferAmount);
-                BigDecimal toNewBalance = toPreviousBalance.add(transferAmount);
-
-                fromAccount.setBalance(fromNewBalance);
-                fromAccount.setUpdatedAt(LocalDateTime.now());
-                toAccount.setBalance(toNewBalance);
-                toAccount.setUpdatedAt(LocalDateTime.now());
-
-                // 9. Create transaction record
+                // 8. Create transaction record (initially as PENDING)
                 Transaction transaction = createTransaction(
                                 fromAccount,
                                 toAccount,
                                 TransactionType.TRANSFER,
                                 transferAmount,
                                 request.getDescription() != null ? request.getDescription() : "Transfer",
-                                TransactionStatus.COMPLETED);
+                                TransactionStatus.PENDING);
+
+                // 9. Process approval through chain
+                ApprovalResult approvalResult = transactionApprovalService.processApproval(transaction);
+
+                // 10. Handle approval result
+                BigDecimal fromNewBalance;
+                BigDecimal toNewBalance;
+                if (approvalResult.isApproved() && approvalResult.getStatus() == ApprovalStatus.AUTO_APPROVED) {
+                        // Auto-approved: Execute the transfer
+                        fromNewBalance = fromPreviousBalance.subtract(transferAmount);
+                        toNewBalance = toPreviousBalance.add(transferAmount);
+                        fromAccount.setBalance(fromNewBalance);
+                        fromAccount.setUpdatedAt(LocalDateTime.now());
+                        toAccount.setBalance(toNewBalance);
+                        toAccount.setUpdatedAt(LocalDateTime.now());
+                        transaction.setStatus(TransactionStatus.COMPLETED);
+                } else if (approvalResult.isPending()) {
+                        // Pending approval: Don't execute, keep transaction as PENDING
+                        fromNewBalance = fromPreviousBalance; // Balance unchanged
+                        toNewBalance = toPreviousBalance;
+                        logger.info("Transfer transaction {} is pending approval", transaction.getTransactionNumber());
+                } else if (approvalResult.isRejected()) {
+                        // Rejected: Don't execute
+                        throw new IllegalStateException("Transaction rejected: " + approvalResult.getMessage());
+                } else {
+                        // Should not happen, but handle gracefully
+                        fromNewBalance = fromPreviousBalance;
+                        toNewBalance = toPreviousBalance;
+                        transaction.setStatus(TransactionStatus.PENDING);
+                }
 
                 transaction = transactionRepository.save(transaction);
                 fromAccount = accountRepository.save(fromAccount);
                 toAccount = accountRepository.save(toAccount);
 
-                // 10. Attach observers
-                accountSubjectManager.attachAllObservers(fromAccount);
-                accountSubjectManager.attachAllObservers(toAccount);
+                // 11. Only notify observers if transaction was auto-approved and completed
+                if (approvalResult.isApproved() && approvalResult.getStatus() == ApprovalStatus.AUTO_APPROVED) {
+                        // Attach observers
+                        accountSubjectManager.attachAllObservers(fromAccount);
+                        accountSubjectManager.attachAllObservers(toAccount);
 
-                // 11. Notify observers for source account
-                AccountEvent fromEvent = AccountEvent.builder()
-                                .eventType(AccountEventType.TRANSFER_COMPLETED)
-                                .account(fromAccount)
-                                .transaction(transaction)
-                                .timestamp(LocalDateTime.now())
-                                .amount(transferAmount)
-                                .previousBalance(fromPreviousBalance)
-                                .newBalance(fromNewBalance)
-                                .message("Transfer of " + transferAmount + " " + fromAccount.getCurrency() +
-                                                " to account " + toAccount.getAccountNumber() + " completed")
-                                .build();
+                        // Notify observers for source account
+                        AccountEvent fromEvent = AccountEvent.builder()
+                                        .eventType(AccountEventType.TRANSFER_COMPLETED)
+                                        .account(fromAccount)
+                                        .transaction(transaction)
+                                        .timestamp(LocalDateTime.now())
+                                        .amount(transferAmount)
+                                        .previousBalance(fromPreviousBalance)
+                                        .newBalance(fromNewBalance)
+                                        .message("Transfer of " + transferAmount + " " + fromAccount.getCurrency() +
+                                                        " to account " + toAccount.getAccountNumber() + " completed")
+                                        .build();
 
-                accountSubjectManager.notifyObservers(fromEvent);
+                        accountSubjectManager.notifyObservers(fromEvent);
 
-                // 12. Notify observers for destination account
-                AccountEvent toEvent = AccountEvent.builder()
-                                .eventType(AccountEventType.DEPOSIT_COMPLETED)
-                                .account(toAccount)
-                                .transaction(transaction)
-                                .timestamp(LocalDateTime.now())
-                                .amount(transferAmount)
-                                .previousBalance(toPreviousBalance)
-                                .newBalance(toNewBalance)
-                                .message("Transfer received of " + transferAmount + " " + toAccount.getCurrency() +
-                                                " from account " + fromAccount.getAccountNumber())
-                                .build();
+                        // Notify observers for destination account
+                        AccountEvent toEvent = AccountEvent.builder()
+                                        .eventType(AccountEventType.DEPOSIT_COMPLETED)
+                                        .account(toAccount)
+                                        .transaction(transaction)
+                                        .timestamp(LocalDateTime.now())
+                                        .amount(transferAmount)
+                                        .previousBalance(toPreviousBalance)
+                                        .newBalance(toNewBalance)
+                                        .message("Transfer received of " + transferAmount + " "
+                                                        + toAccount.getCurrency() +
+                                                        " from account " + fromAccount.getAccountNumber())
+                                        .build();
 
-                accountSubjectManager.notifyObservers(toEvent);
+                        accountSubjectManager.notifyObservers(toEvent);
 
-                logger.info("Transfer completed successfully from account: {} to account: {}",
-                                fromAccountNumber, request.getToAccountNumber());
+                        logger.info("Transfer completed successfully from account: {} to account: {}",
+                                        fromAccountNumber, request.getToAccountNumber());
 
-                // 13. Check for low balance
-                checkAndNotifyLowBalance(fromAccount, fromNewBalance);
+                        // Check for low balance
+                        checkAndNotifyLowBalance(fromAccount, fromNewBalance);
+                }
 
-                // 14. Return response
+                // 12. Return response
+                String message = approvalResult.isApproved()
+                                ? "Transfer completed successfully"
+                                : "Transfer request submitted and pending approval";
+
                 return TransactionResponse.builder()
-                                .success(true)
-                                .message("Transfer completed successfully")
+                                .success(approvalResult.isApproved())
+                                .message(message)
                                 .newBalance(fromNewBalance)
                                 .transactionNumber(transaction.getTransactionNumber())
                                 .accountNumber(fromAccount.getAccountNumber())

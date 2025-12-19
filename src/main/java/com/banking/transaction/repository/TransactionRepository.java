@@ -3,6 +3,7 @@ package com.banking.transaction.repository;
 import com.banking.transaction.module.entity.Transaction;
 import com.banking.core.enums.TransactionStatus;
 import com.banking.core.enums.TransactionType;
+import com.banking.core.enums.ApprovalStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -33,4 +34,21 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     @Query("SELECT t FROM Transaction t WHERE t.fromAccount.id = :accountId OR t.toAccount.id = :accountId")
     List<Transaction> findAllByAccountId(@Param("accountId") Long accountId);
+
+    /**
+     * Find transactions by approval status
+     */
+    List<Transaction> findByApprovalStatus(ApprovalStatus approvalStatus);
+
+    /**
+     * Find pending approval transactions
+     */
+    @Query("SELECT t FROM Transaction t WHERE t.approvalStatus = :status ORDER BY t.transactionDate DESC")
+    List<Transaction> findPendingApprovals(@Param("status") ApprovalStatus status);
+
+    /**
+     * Find transactions by approval status and transaction type
+     */
+    List<Transaction> findByApprovalStatusAndTransactionType(ApprovalStatus approvalStatus,
+            TransactionType transactionType);
 }

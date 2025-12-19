@@ -2,6 +2,7 @@ package com.banking.transaction.module.entity;
 
 import com.banking.core.enums.TransactionType;
 import com.banking.core.enums.TransactionStatus;
+import com.banking.core.enums.ApprovalStatus;
 import com.banking.account.module.entity.Account;
 import com.banking.core.module.entity.AuditLog;
 import jakarta.persistence.*;
@@ -24,7 +25,8 @@ import java.util.List;
         @Index(name = "idx_from_account_id", columnList = "from_account_id"),
         @Index(name = "idx_to_account_id", columnList = "to_account_id"),
         @Index(name = "idx_transaction_date", columnList = "transaction_date"),
-        @Index(name = "idx_status", columnList = "status")
+        @Index(name = "idx_status", columnList = "status"),
+        @Index(name = "idx_approval_status", columnList = "approval_status")
 })
 @Getter
 @Setter
@@ -72,6 +74,28 @@ public class Transaction {
 
     @Column(name = "validated_by")
     private Long validatedBy;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "approval_status", length = 20)
+    private ApprovalStatus approvalStatus;
+
+    @Column(name = "approved_by")
+    private Long approvedBy;
+
+    @Column(name = "approved_at")
+    private LocalDateTime approvedAt;
+
+    @Column(name = "rejected_by")
+    private Long rejectedBy;
+
+    @Column(name = "rejected_at")
+    private LocalDateTime rejectedAt;
+
+    @Column(name = "approval_comment", length = 1000)
+    private String approvalComment;
+
+    @Column(name = "handler_used", length = 100)
+    private String handlerUsed;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
