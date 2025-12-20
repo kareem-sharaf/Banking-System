@@ -4,7 +4,7 @@ import com.banking.account.dto.DepositRequest;
 import com.banking.account.dto.WithdrawalRequest;
 import com.banking.transaction.dto.MoneyTransferRequest;
 import com.banking.transaction.dto.TransactionResponse;
-import com.banking.transaction.facade.TransactionFacade;
+import com.banking.transaction.service.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,14 +19,14 @@ import org.springframework.web.bind.annotation.RestController;
  * Transaction Controller
  * 
  * Handles all transaction-related operations including deposits, withdrawals, and transfers.
- * Delegates business logic to TransactionFacade.
+ * Delegates business logic to TransactionService.
  */
 @RestController
 @RequestMapping("/api/transactions")
 @RequiredArgsConstructor
 public class TransactionController {
 
-    private final TransactionFacade transactionFacade;
+    private final TransactionService transactionService;
 
     /**
      * Deposit money into an account
@@ -36,7 +36,7 @@ public class TransactionController {
     public ResponseEntity<TransactionResponse> deposit(
             @PathVariable String accountNumber,
             @Valid @RequestBody DepositRequest request) {
-        return ResponseEntity.ok(transactionFacade.deposit(accountNumber, request));
+        return ResponseEntity.ok(transactionService.deposit(accountNumber, request));
     }
 
     /**
@@ -47,7 +47,7 @@ public class TransactionController {
     public ResponseEntity<TransactionResponse> withdraw(
             @PathVariable String accountNumber,
             @Valid @RequestBody WithdrawalRequest request) {
-        return ResponseEntity.ok(transactionFacade.withdraw(accountNumber, request));
+        return ResponseEntity.ok(transactionService.withdraw(accountNumber, request));
     }
 
     /**
@@ -57,6 +57,6 @@ public class TransactionController {
     @PreAuthorize("hasAnyRole('CUSTOMER', 'TELLER', 'MANAGER', 'ADMIN')")
     public ResponseEntity<TransactionResponse> transfer(
             @Valid @RequestBody MoneyTransferRequest request) {
-        return ResponseEntity.ok(transactionFacade.transfer(request.getFromAccountNumber(), request));
+        return ResponseEntity.ok(transactionService.transfer(request.getFromAccountNumber(), request));
     }
 }
