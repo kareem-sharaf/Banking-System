@@ -1,4 +1,4 @@
-package com.banking.customer.facade.impl;
+package com.banking.customer.module.entity.facade.imp;
 
 import com.banking.account.dto.AccountSummaryDto;
 import com.banking.account.module.entity.Account;
@@ -10,7 +10,7 @@ import com.banking.core.notification.module.entity.Notification;
 import com.banking.core.notification.repository.NotificationRepository;
 import com.banking.core.auth.module.entity.User;
 import com.banking.core.auth.repository.UserRepository;
-import com.banking.customer.facade.CustomerDashboardFacade;
+import com.banking.customer.module.entity.facade.CustomerDashboardFacade;
 import com.banking.customer.module.entity.Customer;
 import com.banking.customer.repository.CustomerRepository;
 import com.banking.customer.dto.CustomerDashboardDto;

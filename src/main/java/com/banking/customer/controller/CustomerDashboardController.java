@@ -1,7 +1,7 @@
 package com.banking.customer.controller;
 
 import com.banking.customer.dto.CustomerDashboardDto;
-import com.banking.customer.facade.CustomerDashboardFacade;
+import com.banking.customer.module.entity.facade.CustomerDashboardFacade;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

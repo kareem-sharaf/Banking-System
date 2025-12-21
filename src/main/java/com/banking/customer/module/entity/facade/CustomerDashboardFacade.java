@@ -1,4 +1,4 @@
-package com.banking.customer.facade;
+package com.banking.customer.module.entity.facade;
 
 import com.banking.customer.dto.CustomerDashboardDto;
 
