@@ -1,4 +1,4 @@
-package com.banking.config;
+package com.banking.core.config;
 
 import com.banking.core.auth.dto.RegisterRequest;
 import com.banking.core.auth.module.entity.Role;

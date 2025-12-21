@@ -2,21 +2,14 @@ package com.banking.customer.module.entity.facade.imp;
 
 import com.banking.account.dto.AccountSummaryDto;
 import com.banking.account.module.entity.Account;
-import com.banking.account.repository.AccountRepository;
-import com.banking.core.exception.CustomerNotFoundException;
-import com.banking.core.exception.UserNotFoundException;
 import com.banking.core.notification.dto.NotificationSummaryDto;
 import com.banking.core.notification.module.entity.Notification;
-import com.banking.core.notification.repository.NotificationRepository;
-import com.banking.core.auth.module.entity.User;
-import com.banking.core.auth.repository.UserRepository;
-import com.banking.customer.module.entity.facade.CustomerDashboardFacade;
 import com.banking.customer.module.entity.Customer;
-import com.banking.customer.repository.CustomerRepository;
+import com.banking.customer.module.entity.facade.CustomerDashboardFacade;
 import com.banking.customer.dto.CustomerDashboardDto;
+import com.banking.customer.service.CustomerDashboardService;
 import com.banking.transaction.dto.TransactionSummaryDto;
 import com.banking.transaction.module.entity.Transaction;
-import com.banking.transaction.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,67 +20,51 @@ import java.util.stream.Collectors;
 
 /**
  * Customer Dashboard Facade Implementation
- * 
+ *
  * Implements the Facade pattern to provide a simplified interface for aggregating
- * dashboard data from multiple services (Account, Transaction, Notification).
- * 
- * This facade hides the complexity of:
- * - Fetching data from multiple repositories
- * - Coordinating between different services
- * - Assembling the final DTO
- * 
+ * dashboard data from multiple modules through the service layer.
+ *
+ * Architecture layers:
+ * - Facade: Orchestrates cross-module calls and assembles final DTO
+ * - Service: Contains business logic and coordinates query providers
+ * - Query Providers: Encapsulate optimized repository access per module
+ * - Repositories: Handle raw database operations
+ *
  * Benefits:
- * - Single point of access for dashboard data
- * - Reduced coupling between controller and multiple services
- * - Easier to maintain and test
- * - Optimized queries to avoid N+1 problems
+ * - Clean separation of concerns across architectural layers
+ * - Service layer contains domain-specific business logic
+ * - Query providers optimize data access patterns
+ * - Facade focuses solely on DTO assembly and cross-module orchestration
+ * - Each layer is independently testable and maintainable
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class CustomerDashboardFacadeImpl implements CustomerDashboardFacade {
 
-    private static final int RECENT_TRANSACTIONS_LIMIT = 10;
-
-    private final CustomerRepository customerRepository;
-    private final AccountRepository accountRepository;
-    private final TransactionRepository transactionRepository;
-    private final NotificationRepository notificationRepository;
-    private final UserRepository userRepository;
+    private final CustomerDashboardService customerDashboardService;
 
     @Override
     @Transactional(readOnly = true)
     public CustomerDashboardDto getCustomerDashboard(String username) {
         log.debug("Fetching dashboard data for user: {}", username);
-        
-        // 1. Fetch User first, then Customer
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
-        
-        Customer customer = customerRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new CustomerNotFoundException("Customer not found for user: " + username));
 
-        // 2. Fetch Accounts
-        List<Account> accounts = accountRepository.findByCustomerId(customer.getId());
-        
-        // 3. Fetch Transactions (optimized: single query instead of N+1 queries)
-        List<Long> accountIds = accounts.stream().map(Account::getId).toList();
-        List<Transaction> recentTransactions = accountIds.isEmpty() 
-            ? List.of() 
-            : transactionRepository.findRecentTransactionsByAccountIds(accountIds)
-                .stream()
-                .limit(RECENT_TRANSACTIONS_LIMIT)
-                .collect(Collectors.toList());
+        // 1. Get all dashboard data from service
+        CustomerDashboardService.CustomerDashboardData dashboardData =
+            customerDashboardService.getCustomerDashboardData(username);
 
-        // 4. Fetch Notifications (Unread) - use user.getId() to avoid lazy loading
-        List<Notification> notifications = notificationRepository.findByUserIdAndIsRead(user.getId(), false);
+        // 2. Extract entities from service response
+        Customer customer = dashboardData.getCustomer();
+        List<Account> accounts = dashboardData.getAccounts();
+        List<Transaction> recentTransactions = dashboardData.getRecentTransactions();
+        List<Notification> notifications = dashboardData.getUnreadNotifications();
 
-        log.debug("Dashboard data fetched: {} accounts, {} transactions, {} notifications", 
+        log.debug("Dashboard data fetched: {} accounts, {} transactions, {} notifications",
                   accounts.size(), recentTransactions.size(), notifications.size());
 
-        // 5. Assemble DTO
+        // 3. Assemble DTO
         return CustomerDashboardDto.builder()
-                .customerName(user.getFirstName() + " " + user.getLastName())
+                .customerName(customer.getUser().getFirstName() + " " + customer.getUser().getLastName())
                 .customerNumber(customer.getCustomerNumber())
                 .customerStatus(customer.getStatus().name())
                 .accounts(accounts.stream().map(this::mapAccount).collect(Collectors.toList()))

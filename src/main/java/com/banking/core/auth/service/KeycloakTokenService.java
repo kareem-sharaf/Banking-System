@@ -1,6 +1,6 @@
 package com.banking.core.auth.service;
 
-import com.banking.config.KeycloakSecurityProperties;
+import com.banking.core.config.KeycloakSecurityProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;

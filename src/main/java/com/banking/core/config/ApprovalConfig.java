@@ -1,4 +1,4 @@
-package com.banking.config;
+package com.banking.core.config;
 
 import com.banking.transaction.approval.ApprovalChainBuilder;
 import com.banking.transaction.approval.ApprovalHandler;

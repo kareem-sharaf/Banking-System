@@ -1,6 +1,6 @@
 package com.banking.core.auth.service;
 
-import com.banking.config.KeycloakSecurityProperties;
+import com.banking.core.config.KeycloakSecurityProperties;
 import com.banking.core.auth.dto.RegisterRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

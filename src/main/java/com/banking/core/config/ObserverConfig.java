@@ -1,4 +1,4 @@
-package com.banking.config;
+package com.banking.core.config;
 
 import com.banking.account.service.notification.AccountObserver;
 import lombok.extern.slf4j.Slf4j;
