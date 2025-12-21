@@ -1,11 +1,12 @@
 package com.banking.config;
 
-import com.banking.core.auth.adapter.AuthenticationProvider;
-import com.banking.core.auth.adapter.impl.KeycloakAuthenticationAdapter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+
+import com.banking.core.auth.module.adapter.AuthenticationProvider;
+import com.banking.core.auth.module.adapter.imp.KeycloakAuthenticationAdapter;
 
 /**
  * Configuration for Authentication Provider

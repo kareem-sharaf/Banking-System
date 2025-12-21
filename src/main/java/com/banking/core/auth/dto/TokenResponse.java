@@ -1,4 +1,4 @@
-package com.banking.core.auth.adapter.dto;
+package com.banking.core.auth.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

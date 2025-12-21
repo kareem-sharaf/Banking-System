@@ -1,11 +1,14 @@
 package com.banking.core.auth.controller;
 
-import com.banking.core.auth.adapter.AuthenticationProvider;
-import com.banking.core.auth.adapter.dto.*;
 import com.banking.core.auth.dto.AuthResponse;
 import com.banking.core.auth.dto.LoginRequest;
 import com.banking.core.auth.dto.RegisterRequest;
+import com.banking.core.auth.dto.TokenResponse;
+import com.banking.core.auth.dto.UserInfo;
+import com.banking.core.auth.dto.UserRegistrationRequest;
+import com.banking.core.auth.dto.UserRegistrationResult;
 import com.banking.core.auth.module.entity.User;
+import com.banking.core.auth.module.adapter.AuthenticationProvider;
 import com.banking.core.auth.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;

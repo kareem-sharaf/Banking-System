@@ -1,6 +1,10 @@
-package com.banking.core.auth.adapter;
+package com.banking.core.auth.module.adapter;
 
-import com.banking.core.auth.adapter.dto.*;
+import com.banking.core.auth.dto.TokenResponse;
+import com.banking.core.auth.dto.UserInfo;
+import com.banking.core.auth.dto.UserRegistrationRequest;
+import com.banking.core.auth.dto.UserRegistrationResult;
+import com.banking.core.auth.dto.UserUpdateRequest;
 
 /**
  * Common interface for authentication providers

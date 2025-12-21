@@ -1,8 +1,12 @@
-package com.banking.core.auth.adapter.impl;
+package com.banking.core.auth.module.adapter.imp;
 
-import com.banking.core.auth.adapter.AuthenticationProvider;
-import com.banking.core.auth.adapter.dto.*;
 import com.banking.core.auth.dto.RegisterRequest;
+import com.banking.core.auth.dto.TokenResponse;
+import com.banking.core.auth.dto.UserInfo;
+import com.banking.core.auth.dto.UserRegistrationRequest;
+import com.banking.core.auth.dto.UserRegistrationResult;
+import com.banking.core.auth.dto.UserUpdateRequest;
+import com.banking.core.auth.module.adapter.AuthenticationProvider;
 import com.banking.core.auth.service.KeycloakAdminService;
 import com.banking.core.auth.service.KeycloakTokenService;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

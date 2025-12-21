@@ -3,7 +3,6 @@ package com.banking.account.service.notification.handler;
 import com.banking.account.module.entity.Account;
 import com.banking.core.module.entity.AuditLog;
 import com.banking.transaction.module.entity.Transaction;
-import com.banking.core.auth.module.entity.User;
 import com.banking.core.enums.AccountEventType;
 import com.banking.core.enums.ActionType;
 import com.banking.account.service.notification.AccountObserver;
