@@ -20,3 +20,4 @@ public class UserUpdateRequest {
     private boolean emailVerified;
     private boolean enabled;
 }
+

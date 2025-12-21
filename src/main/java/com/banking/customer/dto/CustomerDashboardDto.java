@@ -1,8 +1,12 @@
-package com.banking.customer.facade.dto;
+package com.banking.customer.dto;
 
 import lombok.Builder;
 import lombok.Data;
 import java.util.List;
+
+import com.banking.account.dto.AccountSummaryDto;
+import com.banking.core.notification.dto.NotificationSummaryDto;
+import com.banking.transaction.dto.TransactionSummaryDto;
 
 @Data
 @Builder

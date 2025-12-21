@@ -23,3 +23,4 @@ public class UserRegistrationRequest {
     private boolean emailVerified;
     private boolean enabled;
 }
+

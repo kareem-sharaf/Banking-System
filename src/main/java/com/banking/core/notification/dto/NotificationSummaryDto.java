@@ -1,4 +1,4 @@
-package com.banking.customer.facade.dto;
+package com.banking.core.notification.dto;
 
 import lombok.Builder;
 import lombok.Data;

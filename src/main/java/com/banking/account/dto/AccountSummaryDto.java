@@ -1,4 +1,4 @@
-package com.banking.customer.facade.dto;
+package com.banking.account.dto;
 
 import lombok.Builder;
 import lombok.Data;

@@ -36,6 +36,14 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Transaction> findAllByAccountId(@Param("accountId") Long accountId);
 
     /**
+     * Find recent transactions for multiple accounts (optimized query to avoid N+1 problem)
+     * Returns transactions ordered by date descending, limited to specified count
+     */
+    @Query("SELECT t FROM Transaction t WHERE (t.fromAccount.id IN :accountIds OR t.toAccount.id IN :accountIds) " +
+           "ORDER BY t.transactionDate DESC")
+    List<Transaction> findRecentTransactionsByAccountIds(@Param("accountIds") List<Long> accountIds);
+
+    /**
      * Find transactions by approval status
      */
     List<Transaction> findByApprovalStatus(ApprovalStatus approvalStatus);

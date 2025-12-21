@@ -19,3 +19,4 @@ public class UserRegistrationResult {
     private String error;
     private String errorDescription;
 }
+

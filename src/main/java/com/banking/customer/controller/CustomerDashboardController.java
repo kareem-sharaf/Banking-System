@@ -1,7 +1,8 @@
 package com.banking.customer.controller;
 
+import com.banking.customer.dto.CustomerDashboardDto;
 import com.banking.customer.facade.CustomerDashboardFacade;
-import com.banking.customer.facade.dto.CustomerDashboardDto;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
