@@ -5,8 +5,19 @@ import com.banking.core.auth.module.entity.Role;
 import com.banking.core.auth.module.entity.Permission;
 import com.banking.core.auth.module.entity.RolePermission;
 import com.banking.core.auth.module.entity.User;
+import com.banking.account.module.entity.Account;
 import com.banking.account.module.entity.AccountType;
+import com.banking.customer.module.entity.Customer;
+import com.banking.transaction.module.entity.ScheduledTransaction;
+import com.banking.transaction.module.entity.Transaction;
+import com.banking.support.module.entity.SupportTicket;
+import com.banking.core.enums.*;
+import com.banking.account.repository.AccountRepository;
 import com.banking.account.repository.AccountTypeRepository;
+import com.banking.customer.repository.CustomerRepository;
+import com.banking.transaction.repository.ScheduledTransactionRepository;
+import com.banking.transaction.repository.TransactionRepository;
+import com.banking.support.repository.SupportTicketRepository;
 import com.banking.core.auth.repository.RoleRepository;
 import com.banking.core.auth.repository.PermissionRepository;
 import com.banking.core.auth.repository.RolePermissionRepository;
@@ -53,6 +64,21 @@ public class DataSeeder implements CommandLineRunner {
     private UserRepository userRepository;
 
     @Autowired
+    private CustomerRepository customerRepository;
+
+    @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
+
+    @Autowired
+    private ScheduledTransactionRepository scheduledTransactionRepository;
+
+    @Autowired
+    private SupportTicketRepository supportTicketRepository;
+
+    @Autowired
     private KeycloakAdminService keycloakAdminService;
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -66,6 +92,11 @@ public class DataSeeder implements CommandLineRunner {
         seedAccountTypes();
         seedRolePermissions();
         seedAdminUser();
+
+        // Seed sample data for testing (only in development)
+        if (isDevelopmentEnvironment()) {
+            seedSampleData();
+        }
 
         logger.info("Routine tables seeding completed successfully!");
     }
@@ -205,7 +236,11 @@ public class DataSeeder implements CommandLineRunner {
                 createAccountType("Investment Account", "INVESTMENT", "Investment account with higher returns"),
                 createAccountType("Child Savings Account", "CHILD_SAVINGS", "Savings account designed for children"),
                 createAccountType("Business Account", "BUSINESS", "Business account for companies"),
-                createAccountType("Deposit Account", "DEPOSIT", "Time deposit account"));
+                createAccountType("Deposit Account", "DEPOSIT", "Time deposit account"),
+                createAccountType("Loan Account", "LOAN", "Personal loan account with variable interest"),
+                createAccountType("Mortgage Account", "MORTGAGE", "Mortgage loan account"),
+                createAccountType("Credit Card", "CREDIT_CARD", "Credit card account"),
+                createAccountType("Certificate of Deposit", "CD", "High-yield certificate of deposit"));
 
         for (AccountType accountType : accountTypes) {
             if (!accountTypeRepository.existsByCode(accountType.getCode())) {
@@ -363,5 +398,313 @@ public class DataSeeder implements CommandLineRunner {
         } catch (Exception e) {
             logger.warn("Could not create admin user in Keycloak (Keycloak may not be running): {}", e.getMessage());
         }
+    }
+
+    /**
+     * Check if we're running in development environment
+     */
+    private boolean isDevelopmentEnvironment() {
+        String[] activeProfiles = {"dev", "development", "local", "test"};
+        // In a real application, you'd check Spring profiles here
+        // For now, we'll assume development if no production profile is set
+        return true; // Always seed sample data for development
+    }
+
+    /**
+     * Seed sample data for development/testing
+     */
+    private void seedSampleData() {
+        logger.info("Seeding sample data for development...");
+
+        try {
+            seedSampleUsers();
+            seedSampleCustomers();
+            seedSampleAccounts();
+            seedSampleTransactions();
+            seedSampleScheduledTransactions();
+            seedSampleSupportTickets();
+
+            logger.info("Sample data seeding completed successfully!");
+        } catch (Exception e) {
+            logger.warn("Failed to seed sample data: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * Seed sample users
+     */
+    private void seedSampleUsers() {
+        logger.info("Seeding sample users...");
+
+        Role customerRole = roleRepository.findByCode("CUSTOMER").orElse(null);
+        Role tellerRole = roleRepository.findByCode("TELLER").orElse(null);
+        Role managerRole = roleRepository.findByCode("MANAGER").orElse(null);
+
+        if (customerRole == null || tellerRole == null || managerRole == null) {
+            logger.warn("Required roles not found for sample users");
+            return;
+        }
+
+        // Sample customers
+        List<User> sampleUsers = Arrays.asList(
+            createSampleUser("john.doe", "john.doe@email.com", "John", "Doe", customerRole, "johndoe"),
+            createSampleUser("jane.smith", "jane.smith@email.com", "Jane", "Smith", customerRole, "janesmith"),
+            createSampleUser("bob.johnson", "bob.johnson@email.com", "Bob", "Johnson", customerRole, "bobjohnson"),
+            createSampleUser("alice.brown", "alice.brown@email.com", "Alice", "Brown", tellerRole, "alicebrown"),
+            createSampleUser("charlie.wilson", "charlie.wilson@email.com", "Charlie", "Wilson", managerRole, "charliewilson")
+        );
+
+        for (User user : sampleUsers) {
+            if (!userRepository.existsByUsername(user.getUsername())) {
+                try {
+                    // Create in Keycloak first
+                    RegisterRequest registerRequest = new RegisterRequest();
+                    registerRequest.setUsername(user.getUsername());
+                    registerRequest.setEmail(user.getEmail());
+                    registerRequest.setPassword(user.getUsername() + "123"); // Simple password for testing
+                    registerRequest.setFirstName(user.getFirstName());
+                    registerRequest.setLastName(user.getLastName());
+                    registerRequest.setRole(user.getRole().getCode());
+
+                    Map<String, Object> result = keycloakAdminService.createUser(registerRequest);
+                    if ((Boolean) result.getOrDefault("success", false)) {
+                        // Now create in local database
+                        userRepository.save(user);
+                        logger.info("Created sample user: {}", user.getUsername());
+                    }
+                } catch (Exception e) {
+                    logger.debug("Could not create user {} in Keycloak: {}", user.getUsername(), e.getMessage());
+                }
+            }
+        }
+    }
+
+    /**
+     * Seed sample customers linked to users
+     */
+    private void seedSampleCustomers() {
+        logger.info("Seeding sample customers...");
+
+        List<String[]> customerData = Arrays.asList(
+            new String[]{"john.doe", "CUST-001"},
+            new String[]{"jane.smith", "CUST-002"},
+            new String[]{"bob.johnson", "CUST-003"}
+        );
+
+        for (String[] data : customerData) {
+            String username = data[0];
+            String customerNumber = data[1];
+
+            User user = userRepository.findByUsername(username).orElse(null);
+            if (user != null && !customerRepository.existsByUserId(user.getId())) {
+                Customer customer = new Customer();
+                customer.setUser(user);
+                customer.setCustomerNumber(customerNumber);
+                customer.setStatus(CustomerStatus.ACTIVE);
+
+                customerRepository.save(customer);
+                logger.info("Created sample customer: {} for user {}", customerNumber, username);
+            }
+        }
+    }
+
+    /**
+     * Seed sample accounts for customers
+     */
+    private void seedSampleAccounts() {
+        logger.info("Seeding sample accounts...");
+
+        List<String[]> accountData = Arrays.asList(
+            new String[]{"john.doe", "SAVINGS", "10000.00"},
+            new String[]{"john.doe", "CHECKING", "2500.00"},
+            new String[]{"jane.smith", "SAVINGS", "15000.00"},
+            new String[]{"jane.smith", "INVESTMENT", "50000.00"},
+            new String[]{"bob.johnson", "CHECKING", "7500.00"},
+            new String[]{"bob.johnson", "BUSINESS", "25000.00"}
+        );
+
+        for (String[] data : accountData) {
+            String username = data[0];
+            String accountTypeCode = data[1];
+            String balanceStr = data[2];
+
+            User user = userRepository.findByUsername(username).orElse(null);
+            if (user != null) {
+                Customer customer = customerRepository.findByUserId(user.getId()).orElse(null);
+                AccountType accountType = accountTypeRepository.findByCode(accountTypeCode).orElse(null);
+
+                if (customer != null && accountType != null) {
+                    Account account = new Account();
+                    account.setAccountNumber(generateAccountNumber());
+                    account.setCustomer(customer);
+                    account.setAccountType(accountType);
+                    account.setBalance(new java.math.BigDecimal(balanceStr));
+                    account.setCurrency("SAR");
+                    account.setState(AccountState.ACTIVE);
+
+                    accountRepository.save(account);
+                    logger.info("Created sample account: {} ({}) for customer {}",
+                        account.getAccountNumber(), accountTypeCode, username);
+                }
+            }
+        }
+    }
+
+    /**
+     * Seed sample transactions
+     */
+    private void seedSampleTransactions() {
+        logger.info("Seeding sample transactions...");
+
+        // Get some accounts for transactions
+        List<Account> accounts = accountRepository.findAll();
+        if (accounts.size() < 2) {
+            logger.debug("Not enough accounts for sample transactions");
+            return;
+        }
+
+        // Sample deposits
+        for (int i = 0; i < Math.min(3, accounts.size()); i++) {
+            Account account = accounts.get(i);
+            createSampleTransaction(account, null, TransactionType.DEPOSIT,
+                new java.math.BigDecimal("1000.00"), "Initial deposit");
+        }
+
+        // Sample transfers between accounts
+        if (accounts.size() >= 2) {
+            Account fromAccount = accounts.get(0);
+            Account toAccount = accounts.get(1);
+
+            if (fromAccount.getBalance().compareTo(new java.math.BigDecimal("500.00")) >= 0) {
+                createSampleTransaction(fromAccount, toAccount, TransactionType.TRANSFER,
+                    new java.math.BigDecimal("500.00"), "Sample transfer");
+            }
+        }
+
+        logger.info("Sample transactions created");
+    }
+
+    /**
+     * Seed sample scheduled transactions
+     */
+    private void seedSampleScheduledTransactions() {
+        logger.info("Seeding sample scheduled transactions...");
+
+        // Get sample accounts and transactions
+        List<Account> accounts = accountRepository.findAll();
+        List<Transaction> transactions = transactionRepository.findAll();
+
+        if (accounts.isEmpty() || transactions.isEmpty()) {
+            logger.debug("Not enough data for sample scheduled transactions");
+            return;
+        }
+
+        // Create a sample scheduled transaction
+        Transaction templateTransaction = transactions.get(0);
+        Account account = accounts.get(0);
+
+        ScheduledTransaction scheduledTx = new ScheduledTransaction();
+        scheduledTx.setTransactionTemplate(templateTransaction);
+        scheduledTx.setScheduleType(ScheduleType.MONTHLY);
+        scheduledTx.setNextExecutionDate(LocalDateTime.now().plusDays(30));
+        scheduledTx.setIsActive(true);
+
+        scheduledTransactionRepository.save(scheduledTx);
+        logger.info("Created sample scheduled transaction for monthly execution");
+    }
+
+    /**
+     * Seed sample support tickets
+     */
+    private void seedSampleSupportTickets() {
+        logger.info("Seeding sample support tickets...");
+
+        List<Customer> customers = customerRepository.findAll();
+        if (customers.isEmpty()) {
+            logger.debug("No customers found for sample tickets");
+            return;
+        }
+
+        List<String[]> ticketData = Arrays.asList(
+            new String[]{"Account balance not updating", "My account balance shows incorrect amount after recent deposit",
+                "ACCOUNT_ISSUE", "MEDIUM"},
+            new String[]{"Transaction not appearing", "I made a transfer yesterday but it doesn't show in my history",
+                "TRANSACTION_ISSUE", "HIGH"},
+            new String[]{"Login issues", "Having trouble logging into my account from mobile app",
+                "TECHNICAL_SUPPORT", "LOW"}
+        );
+
+        for (int i = 0; i < Math.min(ticketData.size(), customers.size()); i++) {
+            String[] data = ticketData.get(i);
+            Customer customer = customers.get(i);
+
+            SupportTicket ticket = new SupportTicket();
+            ticket.setTicketNumber("TICKET-" + String.format("%03d", i + 1));
+            ticket.setCustomer(customer);
+            ticket.setSubject(data[0]);
+            ticket.setDescription(data[1]);
+            ticket.setCategory(TicketCategory.valueOf(data[2]));
+            ticket.setPriority(TicketPriority.valueOf(data[3]));
+            ticket.setStatus(TicketStatus.OPEN);
+
+            supportTicketRepository.save(ticket);
+            logger.info("Created sample support ticket: {}", ticket.getSubject());
+        }
+    }
+
+    /**
+     * Helper method to create sample user
+     */
+    private User createSampleUser(String username, String email, String firstName,
+                                String lastName, Role role, String keycloakId) {
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setPhoneNumber("+9665" + String.format("%08d", username.hashCode() % 100000000));
+        user.setDateOfBirth(LocalDate.of(1980 + (username.hashCode() % 20), 1 + (username.hashCode() % 12), 1 + (username.hashCode() % 28)));
+        user.setActive(true);
+        user.setRole(role);
+        return user;
+    }
+
+    /**
+     * Helper method to create sample transaction
+     */
+    private void createSampleTransaction(Account fromAccount, Account toAccount,
+                                       TransactionType type, java.math.BigDecimal amount, String description) {
+        Transaction transaction = new Transaction();
+        transaction.setTransactionNumber("TXN-" + System.currentTimeMillis() + "-" + fromAccount.getId());
+        transaction.setAmount(amount);
+        transaction.setTransactionType(type);
+        transaction.setFromAccount(fromAccount);
+        transaction.setToAccount(toAccount);
+        transaction.setDescription(description);
+        transaction.setStatus(TransactionStatus.COMPLETED);
+        transaction.setTransactionDate(LocalDateTime.now().minusDays((long) (Math.random() * 30)));
+
+        // Update account balances
+        if (type == TransactionType.DEPOSIT || type == TransactionType.TRANSFER) {
+            fromAccount.setBalance(fromAccount.getBalance().add(amount));
+        } else if (type == TransactionType.WITHDRAWAL) {
+            fromAccount.setBalance(fromAccount.getBalance().subtract(amount));
+        }
+
+        transactionRepository.save(transaction);
+        accountRepository.save(fromAccount);
+        if (toAccount != null) {
+            if (type == TransactionType.TRANSFER) {
+                toAccount.setBalance(toAccount.getBalance().add(amount));
+            }
+            accountRepository.save(toAccount);
+        }
+    }
+
+    /**
+     * Generate account number
+     */
+    private String generateAccountNumber() {
+        return "ACC-" + String.format("%010d", (long) (Math.random() * 10000000000L));
     }
 }
