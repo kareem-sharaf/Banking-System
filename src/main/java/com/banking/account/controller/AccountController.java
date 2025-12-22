@@ -4,6 +4,7 @@ import com.banking.account.dto.AccountResponse;
 import com.banking.account.dto.CreateAccountRequest;
 import com.banking.account.dto.UpdateAccountRequest;
 import com.banking.account.service.AccountService;
+import java.util.List;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -29,6 +30,24 @@ public class AccountController {
     private static final Logger logger = LoggerFactory.getLogger(AccountController.class);
 
     private final AccountService accountService;
+
+    /**
+     * Get all accounts
+     */
+    @GetMapping
+    @PreAuthorize("hasAnyRole('TELLER', 'MANAGER', 'ADMIN')")
+    public ResponseEntity<List<AccountResponse>> getAllAccounts() {
+        return ResponseEntity.ok(accountService.getAllAccounts());
+    }
+
+    /**
+     * Get accounts by customer ID
+     */
+    @GetMapping("/customer/{customerId}")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'TELLER', 'MANAGER', 'ADMIN')")
+    public ResponseEntity<List<AccountResponse>> getAccountsByCustomerId(@PathVariable Long customerId) {
+        return ResponseEntity.ok(accountService.getAccountsByCustomerId(customerId));
+    }
 
     /**
      * Create a new account

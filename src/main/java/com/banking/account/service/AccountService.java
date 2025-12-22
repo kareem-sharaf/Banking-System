@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -134,6 +135,26 @@ public class AccountService {
                 .createdAt(account.getCreatedAt())
                 .customerId(account.getCustomer().getId())
                 .build();
+    }
+
+    /**
+     * Get all accounts
+     */
+    public List<AccountResponse> getAllAccounts() {
+        logger.info("Retrieving all accounts");
+        return accountRepository.findAll().stream()
+                .map(this::mapToResponse)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    /**
+     * Get accounts by customer ID
+     */
+    public List<AccountResponse> getAccountsByCustomerId(Long customerId) {
+        logger.info("Retrieving accounts for customer: {}", customerId);
+        return accountRepository.findByCustomerId(customerId).stream()
+                .map(this::mapToResponse)
+                .collect(java.util.stream.Collectors.toList());
     }
 
     private String generateAccountNumber() {

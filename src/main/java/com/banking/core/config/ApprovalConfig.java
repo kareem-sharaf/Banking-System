@@ -8,6 +8,7 @@ import com.banking.transaction.approval.handler.ManagerApprovalHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 /**
  * Approval Configuration
@@ -21,19 +22,20 @@ public class ApprovalConfig {
 
         /**
          * Build and configure the approval chain
-         * 
+         *
          * The chain is built in the following order:
          * 1. AutoApprovalHandler - for small transactions (< threshold)
          * 2. ManagerApprovalHandler - for medium transactions (threshold -
          * maxThreshold)
          * 3. DirectorApprovalHandler - for large transactions (>= maxThreshold)
-         * 
+         *
          * @param autoHandler     Auto approval handler
          * @param managerHandler  Manager approval handler
          * @param directorHandler Director approval handler
          * @return The first handler in the approval chain
          */
         @Bean
+        @Primary
         public ApprovalHandler approvalHandlerChain(
                         AutoApprovalHandler autoHandler,
                         ManagerApprovalHandler managerHandler,
