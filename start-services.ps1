@@ -19,6 +19,34 @@ try {
     Write-Host "ERROR: Maven not found! Please install Maven first." -ForegroundColor Red
     exit 1
 }
+ 
+# Check and start Keycloak
+Write-Host "`nChecking Keycloak container..." -ForegroundColor Cyan
+try {
+    $keycloakContainer = docker ps -a --filter "name=banking-keycloak-dev" --format "{{.Names}}" 2>&1
+    if ($keycloakContainer -eq "banking-keycloak-dev") {
+        $keycloakRunning = docker ps --filter "name=banking-keycloak-dev" --format "{{.Names}}" 2>&1
+        if ($keycloakRunning -eq "banking-keycloak-dev") {
+            Write-Host "  Keycloak is already running" -ForegroundColor Green
+        } else {
+            Write-Host "  Starting Keycloak container..." -ForegroundColor Yellow
+            docker start banking-keycloak-dev 2>&1 | Out-Null
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "  Keycloak started successfully" -ForegroundColor Green
+                Write-Host "  Waiting 5 seconds for Keycloak to initialize..." -ForegroundColor Yellow
+                Start-Sleep -Seconds 5
+            } else {
+                Write-Host "  WARNING: Failed to start Keycloak container" -ForegroundColor Yellow
+                Write-Host "  You may need to run: docker-compose -f docker-compose.dev.yml up -d" -ForegroundColor Cyan
+            }
+        }
+    } else {
+        Write-Host "  WARNING: Keycloak container 'banking-keycloak-dev' not found" -ForegroundColor Yellow
+        Write-Host "  You may need to run: docker-compose -f docker-compose.dev.yml up -d" -ForegroundColor Cyan
+    }
+} catch {
+    Write-Host "  WARNING: Could not check Keycloak status. Docker may not be running." -ForegroundColor Yellow
+}
 
 Write-Host "`nStarting backend instances on ports: $($BackendPorts -join ', ')" -ForegroundColor Cyan
 
@@ -76,12 +104,17 @@ Write-Host "`nWaiting 10 seconds for services to initialize..." -ForegroundColor
 Start-Sleep -Seconds 10
 
 Write-Host "`nInitial status check:" -ForegroundColor Cyan
-foreach ($port in ($BackendPorts + @($GatewayPort))) {
+foreach ($port in ($BackendPorts + @($GatewayPort) + @(8180))) {
+    $portName = switch ($port) {
+        8180 { "Keycloak" }
+        8080 { "Gateway" }
+        default { "Backend" }
+    }
     $connection = Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue
     if ($connection) {
-        Write-Host "  Port $port : Running" -ForegroundColor Green
+        Write-Host "  $portName (Port $port) : Running" -ForegroundColor Green
     } else {
-        Write-Host "  Port $port : Starting..." -ForegroundColor Yellow
+        Write-Host "  $portName (Port $port) : Starting..." -ForegroundColor Yellow
     }
 }
 

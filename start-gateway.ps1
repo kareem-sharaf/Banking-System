@@ -8,7 +8,7 @@ $gatewayDir = Join-Path $root "gateway-service"
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "Starting Gateway Service on Port $GatewayPort" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
-
+ 
 # Check if Maven is available
 try {
     $mvnVersion = mvn --version 2>&1 | Out-String
