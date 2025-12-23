@@ -2,7 +2,7 @@
     "info": {
         "_postman_id": "banking-system-collection",
         "name": "Banking System API",
-        "description": "Complete API collection for Banking System with Keycloak authentication",
+        "description": "Complete API collection for Banking System with Keycloak authentication. Updated with full CRUD endpoints for all entities.",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
         "_exporter_id": "banking-system"
     },
@@ -478,7 +478,175 @@
                                 "accounts"
                             ]
                         },
-                        "description": "Get all accounts"
+                        "description": "Get all accounts. Requires: ADMIN, MANAGER, or TELLER role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Account by ID",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/accounts/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "accounts",
+                                "1"
+                            ]
+                        },
+                        "description": "Get account by ID. Requires: ADMIN, MANAGER, TELLER, or account owner"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Account",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"customerId\": 1,\n    \"accountTypeCode\": \"SAVINGS\",\n    \"initialDeposit\": 1000.00,\n    \"description\": \"New savings account\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/accounts",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "accounts"
+                            ]
+                        },
+                        "description": "Create a new account. Requires: ADMIN, MANAGER, or TELLER role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Account",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"description\": \"Updated account description\",\n    \"accountState\": \"ACTIVE\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/accounts/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "accounts",
+                                "1"
+                            ]
+                        },
+                        "description": "Update account details. Requires: ADMIN, MANAGER, or TELLER role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Account",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/accounts/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "accounts",
+                                "1"
+                            ]
+                        },
+                        "description": "Delete account (soft delete). Requires: ADMIN role only"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Accounts by Customer",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/accounts/customer/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "accounts",
+                                "customer",
+                                "1"
+                            ]
+                        },
+                        "description": "Get all accounts for a specific customer. Requires: ADMIN, MANAGER, TELLER, or customer owner"
                     },
                     "response": []
                 },
@@ -738,6 +906,1171 @@
                 }
             ],
             "description": "Account operations with Observer Pattern integration. All operations trigger notifications via Email, SMS, In-App, and Audit observers."
+        },
+        {
+            "name": "Account Types",
+            "item": [
+                {
+                    "name": "Get All Account Types",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/account-types",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "account-types"
+                            ]
+                        },
+                        "description": "Get all account types. Requires: Any authenticated user"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Account Type by ID",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/account-types/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "account-types",
+                                "1"
+                            ]
+                        },
+                        "description": "Get account type by ID. Requires: Any authenticated user"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Account Type by Code",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/account-types/code/SAVINGS",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "account-types",
+                                "code",
+                                "SAVINGS"
+                            ]
+                        },
+                        "description": "Get account type by code. Requires: Any authenticated user"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Account Type",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"INVESTMENT\",\n    \"name\": \"Investment Account\",\n    \"description\": \"High-yield investment account\",\n    \"interestRate\": 3.5,\n    \"minimumBalance\": 10000.00,\n    \"monthlyFee\": 0.00,\n    \"isActive\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/account-types",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "account-types"
+                            ]
+                        },
+                        "description": "Create a new account type. Requires: ADMIN role only"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Account Type",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Updated Investment Account\",\n    \"description\": \"Updated description\",\n    \"interestRate\": 4.0,\n    \"isActive\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/account-types/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "account-types",
+                                "1"
+                            ]
+                        },
+                        "description": "Update account type. Requires: ADMIN role only"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Account Type",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/account-types/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "account-types",
+                                "1"
+                            ]
+                        },
+                        "description": "Delete account type. Requires: ADMIN role only"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Account Type CRUD operations"
+        },
+        {
+            "name": "Customers",
+            "item": [
+                {
+                    "name": "Get All Customers",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/customers",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "customers"
+                            ]
+                        },
+                        "description": "Get all customers. Requires: ADMIN, MANAGER, or TELLER role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Customer by ID",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/customers/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "customers",
+                                "1"
+                            ]
+                        },
+                        "description": "Get customer by ID. Requires: ADMIN, MANAGER, TELLER, or customer owner"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Customer by User ID",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/customers/user/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "customers",
+                                "user",
+                                "1"
+                            ]
+                        },
+                        "description": "Get customer by user ID. Requires: ADMIN, MANAGER, TELLER, or customer owner"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Customer by Customer Number",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/customers/number/CUST-001",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "customers",
+                                "number",
+                                "CUST-001"
+                            ]
+                        },
+                        "description": "Get customer by customer number. Requires: ADMIN, MANAGER, TELLER, or customer owner"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Customers by Status",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/customers/status/ACTIVE",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "customers",
+                                "status",
+                                "ACTIVE"
+                            ]
+                        },
+                        "description": "Get customers by status. Requires: ADMIN, MANAGER, or TELLER role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Customer",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"userId\": 1,\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"phoneNumber\": \"+1234567890\",\n    \"dateOfBirth\": \"1990-01-01\",\n    \"address\": \"123 Main St\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/customers",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "customers"
+                            ]
+                        },
+                        "description": "Create a new customer. Requires: ADMIN, MANAGER, or TELLER role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Customer",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"firstName\": \"Jane\",\n    \"phoneNumber\": \"+0987654321\",\n    \"address\": \"456 Oak Ave\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/customers/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "customers",
+                                "1"
+                            ]
+                        },
+                        "description": "Update customer details. Requires: ADMIN, MANAGER, TELLER, or customer owner"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Customer",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/customers/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "customers",
+                                "1"
+                            ]
+                        },
+                        "description": "Delete customer (soft delete). Requires: ADMIN role only"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Customer CRUD operations"
+        },
+        {
+            "name": "Transactions",
+            "item": [
+                {
+                    "name": "Get All Transactions",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/transactions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transactions"
+                            ]
+                        },
+                        "description": "Get all transactions. Requires: ADMIN, MANAGER, or TELLER role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Transaction by ID",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/transactions/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transactions",
+                                "1"
+                            ]
+                        },
+                        "description": "Get transaction by ID. Requires: ADMIN, MANAGER, TELLER, or transaction account owner"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Transactions by Account",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/transactions/account/{{account_number}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transactions",
+                                "account",
+                                "{{account_number}}"
+                            ]
+                        },
+                        "description": "Get transactions for a specific account. Requires: ADMIN, MANAGER, TELLER, or account owner"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Transactions by Customer",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/transactions/customer/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transactions",
+                                "customer",
+                                "1"
+                            ]
+                        },
+                        "description": "Get all transactions for a customer. Requires: ADMIN, MANAGER, TELLER, or customer owner"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Transaction operations with comprehensive filtering"
+        },
+        {
+            "name": "Users",
+            "item": [
+                {
+                    "name": "Get All Users",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/users",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "users"
+                            ]
+                        },
+                        "description": "Get all users. Requires: ADMIN or MANAGER role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get User by ID",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/users/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "users",
+                                "1"
+                            ]
+                        },
+                        "description": "Get user by ID. Requires: ADMIN, MANAGER, or the user themselves"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get User by Username",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/users/username/admin",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "users",
+                                "username",
+                                "admin"
+                            ]
+                        },
+                        "description": "Get user by username. Requires: ADMIN, MANAGER, or the user themselves"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create User",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"newuser\",\n    \"email\": \"newuser@example.com\",\n    \"firstName\": \"New\",\n    \"lastName\": \"User\",\n    \"roleName\": \"CUSTOMER\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/users",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "users"
+                            ]
+                        },
+                        "description": "Create a new user. Requires: ADMIN role only"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update User",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"firstName\": \"Updated\",\n    \"lastName\": \"Name\",\n    \"email\": \"updated@example.com\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/users/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "users",
+                                "1"
+                            ]
+                        },
+                        "description": "Update user details. Requires: ADMIN, MANAGER, or the user themselves"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete User",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/users/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "users",
+                                "1"
+                            ]
+                        },
+                        "description": "Delete user. Requires: ADMIN role only"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "User CRUD operations"
+        },
+        {
+            "name": "Permissions",
+            "item": [
+                {
+                    "name": "Get All Permissions",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/permissions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "permissions"
+                            ]
+                        },
+                        "description": "Get all permissions. Requires: ADMIN or MANAGER role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Permission by ID",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/permissions/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "permissions",
+                                "1"
+                            ]
+                        },
+                        "description": "Get permission by ID. Requires: ADMIN or MANAGER role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Permission by Name",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/permissions/name/READ_ACCOUNT",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "permissions",
+                                "name",
+                                "READ_ACCOUNT"
+                            ]
+                        },
+                        "description": "Get permission by name. Requires: ADMIN or MANAGER role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Permission",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"CREATE_REPORT\",\n    \"description\": \"Permission to create reports\",\n    \"resource\": \"REPORT\",\n    \"action\": \"CREATE\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/permissions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "permissions"
+                            ]
+                        },
+                        "description": "Create a new permission. Requires: ADMIN role only"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Permission",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"description\": \"Updated permission description\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/permissions/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "permissions",
+                                "1"
+                            ]
+                        },
+                        "description": "Update permission. Requires: ADMIN role only"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Permission",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/permissions/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "permissions",
+                                "1"
+                            ]
+                        },
+                        "description": "Delete permission. Requires: ADMIN role only"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Permission CRUD operations"
+        },
+        {
+            "name": "Role Permissions",
+            "item": [
+                {
+                    "name": "Get All Role Permissions",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/role-permissions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "role-permissions"
+                            ]
+                        },
+                        "description": "Get all role permissions. Requires: ADMIN or MANAGER role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Role Permission by ID",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/role-permissions/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "role-permissions",
+                                "1"
+                            ]
+                        },
+                        "description": "Get role permission by ID. Requires: ADMIN or MANAGER role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Role Permissions by Role ID",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/role-permissions/role/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "role-permissions",
+                                "role",
+                                "1"
+                            ]
+                        },
+                        "description": "Get role permissions by role ID. Requires: ADMIN or MANAGER role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Assign Permission to Role",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"roleId\": 1,\n    \"permissionId\": 1\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/role-permissions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "role-permissions"
+                            ]
+                        },
+                        "description": "Assign permission to role. Requires: ADMIN role only"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Remove Permission from Role",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/role-permissions/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "role-permissions",
+                                "1"
+                            ]
+                        },
+                        "description": "Remove permission from role. Requires: ADMIN role only"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Role Permission CRUD operations"
         },
         {
             "name": "Customer",
@@ -1168,142 +2501,6 @@
             "description": "Admin-only endpoints"
         },
         {
-            "name": "Account Types",
-            "item": [
-                {
-                    "name": "Get All Account Types",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{access_token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{base_url}}/api/account-types",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api",
-                                "account-types"
-                            ]
-                        },
-                        "description": "Get all scheduled transactions"
-                    },
-                    "response": []
-                }
-            ]
-        },
-        {
-            "name": "Customers",
-            "item": [
-                {
-                    "name": "Get All Customers",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{access_token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{base_url}}/api/transactions",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api",
-                                "customers"
-                            ]
-                        },
-                        "description": "Get all customers"
-                    },
-                    "response": []
-                }
-            ]
-        },
-        {
-            "name": "Transactions",
-            "item": [
-                {
-                    "name": "Get All Transactions",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{access_token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{base_url}}/api/transactions",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api",
-                                "customers"
-                            ]
-                        },
-                        "description": "Get all scheduled transactions"
-                    },
-                    "response": []
-                }
-            ]
-        },
-        {
-            "name": "Users",
-            "item": [
-                {
-                    "name": "Get All Users",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{access_token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{base_url}}/api/users",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api",
-                                "users"
-                            ]
-                        },
-                        "description": "Get all users"
-                    },
-                    "response": []
-                }
-            ]
-        },
-        {
             "name": "Roles",
             "item": [
                 {
@@ -1515,40 +2712,6 @@
             ]
         },
         {
-            "name": "Permissions",
-            "item": [
-                {
-                    "name": "Get All Permissions",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{access_token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{base_url}}/api/permissions",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api",
-                                "permissions"
-                            ]
-                        },
-                        "description": "Get all permissions"
-                    },
-                    "response": []
-                }
-            ]
-        },
-        {
             "name": "Notifications",
             "item": [
                 {
@@ -1576,11 +2739,43 @@
                                 "notifications"
                             ]
                         },
-                        "description": "Get all scheduled transactions"
+                        "description": "Get all notifications for the authenticated user"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Mark Notification as Read",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/notifications/1/read",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "notifications",
+                                "1",
+                                "read"
+                            ]
+                        },
+                        "description": "Mark a notification as read. Requires: Notification owner"
                     },
                     "response": []
                 }
-            ]
+            ],
+            "description": "Notification management endpoints"
         },
         {
             "name": "Support Tickets",
@@ -1610,11 +2805,320 @@
                                 "support-tickets"
                             ]
                         },
-                        "description": "Get all support tickets"
+                        "description": "Get all support tickets. Requires: ADMIN, MANAGER, or assigned tickets"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Support Ticket by ID",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/support-tickets/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "support-tickets",
+                                "1"
+                            ]
+                        },
+                        "description": "Get support ticket by ID. Requires: ADMIN, MANAGER, ticket owner, or assigned user"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get My Support Tickets",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/support-tickets/my",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "support-tickets",
+                                "my"
+                            ]
+                        },
+                        "description": "Get support tickets created by the authenticated user. Requires: Any authenticated user"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Support Tickets by Status",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/support-tickets/status/OPEN",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "support-tickets",
+                                "status",
+                                "OPEN"
+                            ]
+                        },
+                        "description": "Get support tickets by status. Requires: ADMIN, MANAGER, or assigned tickets"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Support Ticket",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"subject\": \"Account access issue\",\n    \"description\": \"I cannot access my account online\",\n    \"priority\": \"MEDIUM\",\n    \"category\": \"GENERAL_INQUIRY\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/support-tickets",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "support-tickets"
+                            ]
+                        },
+                        "description": "Create a new support ticket. Requires: Any authenticated user"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Support Ticket",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"subject\": \"Updated subject\",\n    \"description\": \"Updated description\",\n    \"priority\": \"HIGH\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/support-tickets/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "support-tickets",
+                                "1"
+                            ]
+                        },
+                        "description": "Update support ticket. Requires: ADMIN, MANAGER, ticket owner, or assigned user"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Assign Support Ticket",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"assignedToId\": 2\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/support-tickets/1/assign",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "support-tickets",
+                                "1",
+                                "assign"
+                            ]
+                        },
+                        "description": "Assign support ticket to a user. Requires: ADMIN or MANAGER role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Resolve Support Ticket",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"resolutionNotes\": \"Issue resolved by resetting password\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/support-tickets/1/resolve",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "support-tickets",
+                                "1",
+                                "resolve"
+                            ]
+                        },
+                        "description": "Resolve support ticket. Requires: ADMIN, MANAGER, or assigned user"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Support Ticket",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/support-tickets/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "support-tickets",
+                                "1"
+                            ]
+                        },
+                        "description": "Delete support ticket. Requires: ADMIN role only"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Ticket Statistics",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/support-tickets/statistics",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "support-tickets",
+                                "statistics"
+                            ]
+                        },
+                        "description": "Get support ticket statistics. Requires: ADMIN or MANAGER role"
                     },
                     "response": []
                 }
-            ]
+            ],
+            "description": "Support ticket CRUD operations and management"
         },
         {
             "name": "Reports",
@@ -1644,17 +3148,12 @@
                                 "reports"
                             ]
                         },
-                        "description": "Get all scheduled transactions"
+                        "description": "Get all reports. Requires: ADMIN or MANAGER role"
                     },
                     "response": []
-                }
-            ]
-        },
-        {
-            "name": "Audit Logs",
-            "item": [
+                },
                 {
-                    "name": "Get All Audit Logs",
+                    "name": "Get Report by ID",
                     "request": {
                         "auth": {
                             "type": "bearer",
@@ -1669,20 +3168,213 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{base_url}}/api/audit-logs",
+                            "raw": "{{base_url}}/api/reports/1",
                             "host": [
                                 "{{base_url}}"
                             ],
                             "path": [
                                 "api",
-                                "audit-logs"
+                                "reports",
+                                "1"
                             ]
                         },
-                        "description": "Get all audit logs"
+                        "description": "Get report by ID. Requires: ADMIN, MANAGER, or report owner"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Reports by Type",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/reports/type/TRANSACTION_SUMMARY",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "reports",
+                                "type",
+                                "TRANSACTION_SUMMARY"
+                            ]
+                        },
+                        "description": "Get reports by type. Requires: ADMIN, MANAGER, or report owner"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get My Reports",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/reports/my",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "reports",
+                                "my"
+                            ]
+                        },
+                        "description": "Get reports created by the authenticated user. Requires: Any authenticated user"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Generate Report",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"reportType\": \"TRANSACTION_SUMMARY\",\n    \"format\": \"PDF\",\n    \"startDate\": \"2024-01-01\",\n    \"endDate\": \"2024-01-31\",\n    \"parameters\": {\n        \"accountId\": 1\n    }\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/reports/generate",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "reports",
+                                "generate"
+                            ]
+                        },
+                        "description": "Generate a new report. Requires: ADMIN or MANAGER role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Download Report",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/reports/1/download",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "reports",
+                                "1",
+                                "download"
+                            ]
+                        },
+                        "description": "Download report file. Requires: ADMIN, MANAGER, or report owner"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Report",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/reports/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "reports",
+                                "1"
+                            ]
+                        },
+                        "description": "Delete report. Requires: ADMIN, MANAGER, or report owner"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Available Report Formats",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/reports/formats",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "reports",
+                                "formats"
+                            ]
+                        },
+                        "description": "Get available report formats. Requires: Any authenticated user"
                     },
                     "response": []
                 }
-            ]
+            ],
+            "description": "Report generation and management operations"
         },
         {
             "name": "Scheduled Transactions",
@@ -1712,132 +3404,215 @@
                                 "scheduled-transactions"
                             ]
                         },
-                        "description": "Get all scheduled transactions"
+                        "description": "Get all scheduled transactions. Requires: ADMIN or MANAGER role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Scheduled Transaction by ID",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/scheduled-transactions/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "scheduled-transactions",
+                                "1"
+                            ]
+                        },
+                        "description": "Get scheduled transaction by ID. Requires: ADMIN, MANAGER, or transaction owner"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Active Scheduled Transactions",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/scheduled-transactions/active",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "scheduled-transactions",
+                                "active"
+                            ]
+                        },
+                        "description": "Get active scheduled transactions. Requires: ADMIN or MANAGER role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Scheduled Transaction",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"transactionTemplateId\": 1,\n    \"scheduleType\": \"MONTHLY\",\n    \"startDate\": \"2024-02-01\",\n    \"endDate\": \"2025-02-01\",\n    \"isActive\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/scheduled-transactions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "scheduled-transactions"
+                            ]
+                        },
+                        "description": "Create a new scheduled transaction. Requires: ADMIN, MANAGER, or transaction owner"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Scheduled Transaction",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"scheduleType\": \"WEEKLY\",\n    \"isActive\": false\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/scheduled-transactions/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "scheduled-transactions",
+                                "1"
+                            ]
+                        },
+                        "description": "Update scheduled transaction. Requires: ADMIN, MANAGER, or transaction owner"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Scheduled Transaction",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/scheduled-transactions/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "scheduled-transactions",
+                                "1"
+                            ]
+                        },
+                        "description": "Delete scheduled transaction. Requires: ADMIN, MANAGER, or transaction owner"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Process Due Scheduled Transactions",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/scheduled-transactions/process-due",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "scheduled-transactions",
+                                "process-due"
+                            ]
+                        },
+                        "description": "Process due scheduled transactions manually. Requires: ADMIN role only"
                     },
                     "response": []
                 }
-            ]
+            ],
+            "description": "Scheduled transaction CRUD operations and processing"
         },
         {
-            "name": "Interest Calculation",
+            "name": "Audit Logs",
             "item": [
                 {
-                    "name": "Calculate Interest Now (All Accounts)",
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "if (pm.response.code === 200) {",
-                                    "    const response = pm.response.json();",
-                                    "    console.log(\"Interest calculation completed\");",
-                                    "    console.log(\"Total Accounts: \" + response.totalAccounts);",
-                                    "    console.log(\"Successful: \" + response.successfulCalculations);",
-                                    "    console.log(\"Failed: \" + response.failedCalculations);",
-                                    "    console.log(\"Total Interest: \" + response.totalInterestCalculated);",
-                                    "}"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ],
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{access_token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "POST",
-                        "header": [],
-                        "url": {
-                            "raw": "{{base_url}}/api/interest/calculate-now",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api",
-                                "interest",
-                                "calculate-now"
-                            ]
-                        },
-                        "description": "Trigger manual interest calculation for all active accounts.\n\n**Authorization:**\n- Requires: ADMIN role\n\n**Response:**\n- success: Calculation success status\n- message: Response message\n- calculationTime: When calculation was performed\n- totalAccounts: Total number of accounts processed\n- successfulCalculations: Number of successful calculations\n- failedCalculations: Number of failed calculations\n- skippedAccounts: Number of skipped accounts\n- totalInterestCalculated: Total interest amount calculated\n- calculationDate: Date of calculation\n\n**Note:** This endpoint triggers the daily interest calculation manually. The system also runs automatically at 2 AM daily."
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Calculate Interest for Account",
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "if (pm.response.code === 200) {",
-                                    "    const response = pm.response.json();",
-                                    "    console.log(\"Interest calculation for account completed\");",
-                                    "    console.log(\"Interest Amount: \" + response.totalInterestCalculated);",
-                                    "    if (response.skippedAccounts > 0) {",
-                                    "        console.log(\"⚠️ Calculation was skipped: \" + response.message);",
-                                    "    }",
-                                    "}"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ],
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{access_token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "POST",
-                        "header": [],
-                        "url": {
-                            "raw": "{{base_url}}/api/interest/calculate/{{account_number}}",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api",
-                                "interest",
-                                "calculate",
-                                "{{account_number}}"
-                            ]
-                        },
-                        "description": "Calculate interest for a specific account.\n\n**Authorization:**\n- Requires: ADMIN or MANAGER role\n\n**Path Parameters:**\n- accountNumber: The account number to calculate interest for\n\n**Response:**\n- success: Calculation success status\n- message: Response message\n- calculationTime: When calculation was performed\n- totalAccounts: Always 1 (single account)\n- successfulCalculations: 1 if successful, 0 otherwise\n- failedCalculations: 1 if failed, 0 otherwise\n- skippedAccounts: 1 if skipped, 0 otherwise\n- totalInterestCalculated: Interest amount calculated\n- calculationDate: Date of calculation\n\n**Variables:**\n- account_number: Account number (e.g., ACC-001)"
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Get Last Calculation Summary",
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "if (pm.response.code === 200) {",
-                                    "    const response = pm.response.json();",
-                                    "    console.log(\"Last calculation date: \" + response.calculationDate);",
-                                    "    console.log(\"Total Accounts: \" + response.totalAccounts);",
-                                    "    console.log(\"Successful: \" + response.successfulCalculations);",
-                                    "    console.log(\"Failed: \" + response.failedCalculations);",
-                                    "    console.log(\"Total Interest: \" + response.totalInterestCalculated);",
-                                    "}"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ],
+                    "name": "Get All Audit Logs",
                     "request": {
                         "auth": {
                             "type": "bearer",
@@ -1852,22 +3627,21 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{base_url}}/api/interest/last-calculation",
+                            "raw": "{{base_url}}/api/audit-logs",
                             "host": [
                                 "{{base_url}}"
                             ],
                             "path": [
                                 "api",
-                                "interest",
-                                "last-calculation"
+                                "audit-logs"
                             ]
                         },
-                        "description": "Get summary of the last interest calculation.\n\n**Authorization:**\n- Requires: Any authenticated user\n\n**Response:**\n- calculationDate: Date of the calculation\n- totalAccounts: Total number of accounts processed\n- successfulCalculations: Number of successful calculations\n- failedCalculations: Number of failed calculations\n- skippedAccounts: Number of skipped accounts\n- totalInterestCalculated: Total interest amount calculated\n- accountDetails: Array of detailed information for each account calculation"
+                        "description": "Get all audit logs. Requires: ADMIN role only"
                     },
                     "response": []
                 },
                 {
-                    "name": "Get Calculation History",
+                    "name": "Get Audit Logs by Action",
                     "request": {
                         "auth": {
                             "type": "bearer",
@@ -1882,14 +3656,85 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{base_url}}/api/interest/history?startDate=2024-01-01&endDate=2024-01-31",
+                            "raw": "{{base_url}}/api/audit-logs?action=DEPOSIT",
                             "host": [
                                 "{{base_url}}"
                             ],
                             "path": [
                                 "api",
-                                "interest",
-                                "history"
+                                "audit-logs"
+                            ],
+                            "query": [
+                                {
+                                    "key": "action",
+                                    "value": "DEPOSIT",
+                                    "description": "Action type filter"
+                                }
+                            ]
+                        },
+                        "description": "Get audit logs by action type. Requires: ADMIN role only"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Audit Logs by User",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/audit-logs?userId=1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "audit-logs"
+                            ],
+                            "query": [
+                                {
+                                    "key": "userId",
+                                    "value": "1",
+                                    "description": "User ID filter"
+                                }
+                            ]
+                        },
+                        "description": "Get audit logs by user ID. Requires: ADMIN role only"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Audit Logs by Date Range",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/audit-logs?startDate=2024-01-01&endDate=2024-01-31",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "audit-logs"
                             ],
                             "query": [
                                 {
@@ -1904,61 +3749,37 @@
                                 }
                             ]
                         },
-                        "description": "Get interest calculation history for a date range.\n\n**Authorization:**\n- Requires: ADMIN or MANAGER role\n\n**Query Parameters:**\n- startDate: Start date (required, format: YYYY-MM-DD)\n- endDate: End date (required, format: YYYY-MM-DD)\n\n**Response:**\n- Array of InterestCalculation objects with details for each calculation"
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Get Account Interest Calculations",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{access_token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{base_url}}/api/interest/account/{{account_number}}?startDate=2024-01-01&endDate=2024-01-31",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api",
-                                "interest",
-                                "account",
-                                "{{account_number}}"
-                            ],
-                            "query": [
-                                {
-                                    "key": "startDate",
-                                    "value": "2024-01-01",
-                                    "description": "Start date (optional, defaults to 1 month ago)"
-                                },
-                                {
-                                    "key": "endDate",
-                                    "value": "2024-01-31",
-                                    "description": "End date (optional, defaults to today)"
-                                }
-                            ]
-                        },
-                        "description": "Get interest calculation history for a specific account.\n\n**Authorization:**\n- Requires: Any authenticated user\n\n**Path Parameters:**\n- accountNumber: The account number\n\n**Query Parameters:**\n- startDate: Start date (optional, defaults to 1 month ago)\n- endDate: End date (optional, defaults to today)\n\n**Response:**\n- Array of InterestCalculation objects for the specified account\n\n**Variables:**\n- account_number: Account number (e.g., ACC-001)"
+                        "description": "Get audit logs by date range. Requires: ADMIN role only"
                     },
                     "response": []
                 }
             ],
-            "description": "Interest Calculation endpoints - Manual calculation, summaries, and history. Uses Strategy Pattern for different account types."
+            "description": "Audit log retrieval and filtering"
         },
         {
-            "name": "Role Permissions",
+            "name": "Spring Boot Actuator",
             "item": [
                 {
-                    "name": "Get All Role Permissions",
+                    "name": "Health Check",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/actuator/health",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "actuator",
+                                "health"
+                            ]
+                        },
+                        "description": "Check application health status. Public endpoint - no authentication required."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Application Info",
                     "request": {
                         "auth": {
                             "type": "bearer",
@@ -1973,21 +3794,199 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{base_url}}/api/role-permissions",
+                            "raw": "{{base_url}}/actuator/info",
                             "host": [
                                 "{{base_url}}"
                             ],
                             "path": [
-                                "api",
-                                "role-permissions"
+                                "actuator",
+                                "info"
                             ]
                         },
-                        "description": "Get all role permissions"
+                        "description": "Get application information. Requires: ADMIN role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Metrics",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/actuator/metrics",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "actuator",
+                                "metrics"
+                            ]
+                        },
+                        "description": "Get application metrics. Requires: ADMIN role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Environment",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/actuator/env",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "actuator",
+                                "env"
+                            ]
+                        },
+                        "description": "Get environment properties. Requires: ADMIN role"
                     },
                     "response": []
                 }
-            ]
+            ],
+            "description": "Spring Boot Actuator endpoints for monitoring and management"
         }
+    ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    ""
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    ""
+                ]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8080",
+            "type": "string"
+        },
+        {
+            "key": "keycloak_url",
+            "value": "http://localhost:8180",
+            "type": "string"
+        },
+        {
+            "key": "realm",
+            "value": "banking-system",
+            "type": "string"
+        },
+        {
+            "key": "client_id",
+            "value": "banking-system-client",
+            "type": "string"
+        },
+        {
+            "key": "client_secret",
+            "value": "your-client-secret-here",
+            "type": "string"
+        },
+        {
+            "key": "test_username",
+            "value": "testuser",
+            "type": "string"
+        },
+        {
+            "key": "test_password",
+            "value": "test123",
+            "type": "string"
+        },
+        {
+            "key": "access_token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "refresh_token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "register_username",
+            "value": "newuser",
+            "type": "string"
+        },
+        {
+            "key": "register_email",
+            "value": "newuser@banking.com",
+            "type": "string"
+        },
+        {
+            "key": "register_password",
+            "value": "password123",
+            "type": "string"
+        },
+        {
+            "key": "register_firstName",
+            "value": "New",
+            "type": "string"
+        },
+        {
+            "key": "register_lastName",
+            "value": "User",
+            "type": "string"
+        },
+        {
+            "key": "register_role",
+            "value": "CUSTOMER",
+            "type": "string"
+        },
+        {
+            "key": "account_number",
+            "value": "ACC-001",
+            "type": "string"
+        },
+        {
+            "key": "destination_account_number",
+            "value": "ACC-002",
+            "type": "string"
+        },
+        {
+            "key": "last_transaction_number",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "last_account_balance",
+            "value": "",
+            "type": "string"
+        }
+    ]
+}
     ],
     "event": [
         {
