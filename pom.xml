@@ -53,6 +53,13 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
+        <!-- Micrometer Prometheus Registry for Grafana -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- OAuth2 Resource Server (للتوافق مع Spring Boot 3.x و Keycloak) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

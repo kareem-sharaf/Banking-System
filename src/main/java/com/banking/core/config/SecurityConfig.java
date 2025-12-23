@@ -31,8 +31,8 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain publicSecurityFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/api/auth/register", "/api/auth/login", "/api/auth/refresh", 
-                                 "/api/auth/validate", "/h2-console/**", "/actuator/health")
+                .securityMatcher("/api/auth/register", "/api/auth/login", "/api/auth/refresh",
+                                 "/api/auth/validate", "/h2-console/**", "/actuator/**")
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())

@@ -1,0 +1,112 @@
+{
+  "realm": "banking-system",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "clients": [
+    {
+      "clientId": "banking-client",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "implicitFlowEnabled": false,
+      "standardFlowEnabled": true,
+      "webOrigins": ["http://localhost:8080"],
+      "redirectUris": ["http://localhost:8080/*"],
+      "secret": "your-client-secret-here"
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "CUSTOMER",
+        "description": "Regular customer role"
+      },
+      {
+        "name": "TELLER",
+        "description": "Bank teller role"
+      },
+      {
+        "name": "MANAGER",
+        "description": "Bank manager role"
+      },
+      {
+        "name": "ADMIN",
+        "description": "System administrator role"
+      }
+    ]
+  },
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "System",
+      "lastName": "Administrator",
+      "email": "admin@banking.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["ADMIN"]
+    },
+    {
+      "username": "manager",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Bank",
+      "lastName": "Manager",
+      "email": "manager@banking.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "manager",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["MANAGER"]
+    },
+    {
+      "username": "teller",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Bank",
+      "lastName": "Teller",
+      "email": "teller@banking.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "teller@banking.com",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["TELLER"]
+    },
+    {
+      "username": "customer",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "John",
+      "lastName": "Customer",
+      "email": "customer@banking.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "customer",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["CUSTOMER"]
+    }
+  ]
+}
