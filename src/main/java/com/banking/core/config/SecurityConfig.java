@@ -32,7 +32,8 @@ public class SecurityConfig {
     public SecurityFilterChain publicSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .securityMatcher("/api/auth/register", "/api/auth/login", "/api/auth/refresh",
-                                 "/api/auth/validate", "/h2-console/**", "/actuator/**")
+                                 "/api/auth/validate", "/h2-console/**", "/actuator/**",
+                                 "/swagger-ui/**", "/api-docs/**", "/swagger-ui.html")
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())

@@ -10,6 +10,12 @@ import com.banking.core.auth.dto.UserRegistrationResult;
 import com.banking.core.auth.module.entity.User;
 import com.banking.core.auth.module.adapter.AuthenticationProvider;
 import com.banking.core.auth.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -34,6 +40,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Authentication", description = "Authentication and user management endpoints")
 public class AuthController {
 
     private final AuthenticationProvider authenticationProvider;
@@ -248,7 +255,18 @@ public class AuthController {
      * 5. Return token + basic user info
      */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest,
+    @Operation(
+            summary = "User Login",
+            description = "Authenticate user with username and password through Keycloak"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Login successful"),
+            @ApiResponse(responseCode = "401", description = "Invalid credentials"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data")
+    })
+    public ResponseEntity<?> login(
+            @Parameter(description = "Login credentials", required = true)
+            @Valid @RequestBody LoginRequest loginRequest,
             HttpServletRequest request) {
         TokenResponse tokenResponse = authenticationProvider.authenticate(
                 loginRequest.getUsername(),
