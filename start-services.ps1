@@ -19,33 +19,80 @@ try {
     Write-Host "ERROR: Maven not found! Please install Maven first." -ForegroundColor Red
     exit 1
 }
- 
-# Check and start Keycloak
-Write-Host "`nChecking Keycloak container..." -ForegroundColor Cyan
+
+# Check if Docker is available
+Write-Host "`nChecking Docker..." -ForegroundColor Cyan
 try {
-    $keycloakContainer = docker ps -a --filter "name=banking-keycloak-dev" --format "{{.Names}}" 2>&1
-    if ($keycloakContainer -eq "banking-keycloak-dev") {
-        $keycloakRunning = docker ps --filter "name=banking-keycloak-dev" --format "{{.Names}}" 2>&1
-        if ($keycloakRunning -eq "banking-keycloak-dev") {
-            Write-Host "  Keycloak is already running" -ForegroundColor Green
-        } else {
-            Write-Host "  Starting Keycloak container..." -ForegroundColor Yellow
-            docker start banking-keycloak-dev 2>&1 | Out-Null
-            if ($LASTEXITCODE -eq 0) {
-                Write-Host "  Keycloak started successfully" -ForegroundColor Green
-                Write-Host "  Waiting 5 seconds for Keycloak to initialize..." -ForegroundColor Yellow
-                Start-Sleep -Seconds 5
-            } else {
-                Write-Host "  WARNING: Failed to start Keycloak container" -ForegroundColor Yellow
-                Write-Host "  You may need to run: docker-compose -f docker-compose.dev.yml up -d" -ForegroundColor Cyan
-            }
-        }
-    } else {
-        Write-Host "  WARNING: Keycloak container 'banking-keycloak-dev' not found" -ForegroundColor Yellow
-        Write-Host "  You may need to run: docker-compose -f docker-compose.dev.yml up -d" -ForegroundColor Cyan
-    }
+    $dockerVersion = docker --version 2>&1
+    Write-Host "Docker found: $dockerVersion" -ForegroundColor Green
 } catch {
-    Write-Host "  WARNING: Could not check Keycloak status. Docker may not be running." -ForegroundColor Yellow
+    Write-Host "WARNING: Docker not found or not running. Docker services may not start." -ForegroundColor Yellow
+}
+
+# Check if docker-compose is available
+Write-Host "`nChecking docker-compose..." -ForegroundColor Cyan
+$useDockerCompose = $null
+$composeCheck = docker-compose --version 2>&1
+if ($LASTEXITCODE -eq 0 -and $composeCheck -notmatch "error|not found") {
+    Write-Host "docker-compose found: $composeCheck" -ForegroundColor Green
+    $useDockerCompose = $true
+} else {
+    Write-Host "docker-compose not found. Trying 'docker compose'..." -ForegroundColor Yellow
+    $composeCheck = docker compose version 2>&1
+    if ($LASTEXITCODE -eq 0 -and $composeCheck -notmatch "error|not found") {
+        Write-Host "docker compose found: $composeCheck" -ForegroundColor Green
+        $useDockerCompose = $false
+    } else {
+        Write-Host "WARNING: Neither 'docker-compose' nor 'docker compose' found!" -ForegroundColor Yellow
+        Write-Host "Docker services will be skipped. Please install docker-compose manually." -ForegroundColor Yellow
+        $useDockerCompose = $null
+    }
+}
+
+# Start Docker services (PostgreSQL + Keycloak)
+Write-Host "`nStarting Docker services (PostgreSQL + Keycloak)..." -ForegroundColor Cyan
+$dockerComposeFile = Join-Path $root "docker-compose.dev.yml"
+if (Test-Path $dockerComposeFile) {
+    try {
+        if ($useDockerCompose -eq $true) {
+            Write-Host "  Running: docker-compose -f docker-compose.dev.yml up -d" -ForegroundColor Gray
+            docker-compose -f docker-compose.dev.yml up -d 2>&1 | Out-Null
+        } elseif ($useDockerCompose -eq $false) {
+            Write-Host "  Running: docker compose -f docker-compose.dev.yml up -d" -ForegroundColor Gray
+            docker compose -f docker-compose.dev.yml up -d 2>&1 | Out-Null
+        } else {
+            Write-Host "  WARNING: docker-compose not available. Skipping Docker services startup." -ForegroundColor Yellow
+            $LASTEXITCODE = 1
+        }
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "  Docker services started successfully" -ForegroundColor Green
+            Write-Host "  Waiting 10 seconds for services to initialize..." -ForegroundColor Yellow
+            Start-Sleep -Seconds 10
+            
+            # Verify services are running
+            $postgresRunning = docker ps --filter "name=banking-postgres-dev" --format "{{.Names}}" 2>&1
+            $keycloakRunning = docker ps --filter "name=banking-keycloak-dev" --format "{{.Names}}" 2>&1
+            
+            if ($postgresRunning -eq "banking-postgres-dev") {
+                Write-Host "  PostgreSQL: Running" -ForegroundColor Green
+            } else {
+                Write-Host "  PostgreSQL: Not running" -ForegroundColor Yellow
+            }
+            
+            if ($keycloakRunning -eq "banking-keycloak-dev") {
+                Write-Host "  Keycloak: Running" -ForegroundColor Green
+            } else {
+                Write-Host "  Keycloak: Not running (may still be starting)" -ForegroundColor Yellow
+            }
+        } else {
+            Write-Host "  WARNING: Failed to start Docker services" -ForegroundColor Yellow
+        }
+    } catch {
+        Write-Host "  WARNING: Error starting Docker services: $($_.Exception.Message)" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "  WARNING: docker-compose.dev.yml not found at: $dockerComposeFile" -ForegroundColor Yellow
 }
 
 Write-Host "`nStarting backend instances on ports: $($BackendPorts -join ', ')" -ForegroundColor Cyan
