@@ -65,7 +65,7 @@ foreach ($port in $allPorts) {
 Write-Host "`nHTTP Health Checks:" -ForegroundColor Yellow
 foreach ($port in $allPorts) {
     try {
-        $response = Invoke-WebRequest -Uri "http://localhost:$port/actuator/health" -TimeoutSec 2 -ErrorAction SilentlyContinue
+        $response = Invoke-WebRequest -Uri "http://localhost:$port/actuator/health" -UseBasicParsing -TimeoutSec 2 -ErrorAction SilentlyContinue
         if ($response.StatusCode -eq 200) {
             Write-Host "  Port $port : Healthy (HTTP 200)" -ForegroundColor Green
         } else {
@@ -75,7 +75,7 @@ foreach ($port in $allPorts) {
         # Try regular endpoint for gateway
         if ($port -eq $GatewayPort) {
             try {
-                $response = Invoke-WebRequest -Uri "http://localhost:$port" -TimeoutSec 2 -ErrorAction SilentlyContinue
+                $response = Invoke-WebRequest -Uri "http://localhost:$port" -UseBasicParsing -TimeoutSec 2 -ErrorAction SilentlyContinue
                 Write-Host "  Port $port : Responding" -ForegroundColor Green
             } catch {
                 Write-Host "  Port $port : Not responding to HTTP requests" -ForegroundColor Red
